@@ -13,6 +13,10 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+ARG NEXT_PUBLIC_PRODUCTION=false
+ARG NEXT_PUBLIC_BASE_DOMAIN=
+ENV NEXT_PUBLIC_PRODUCTION=$NEXT_PUBLIC_PRODUCTION
+ENV NEXT_PUBLIC_BASE_DOMAIN=$NEXT_PUBLIC_BASE_DOMAIN
 RUN NODE_OPTIONS="--max-old-space-size=2048" npm run build
 
 # ── Stage 3: Migrator (knexfile.ts + ts-node gerektirir) ──────────
