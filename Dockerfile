@@ -44,5 +44,10 @@ COPY --from=deps /app/node_modules/better-sqlite3 ./node_modules/better-sqlite3
 COPY --from=deps /app/node_modules/bindings ./node_modules/bindings
 COPY --from=deps /app/node_modules/file-uri-to-path ./node_modules/file-uri-to-path
 
+# sharp native binary (Linux'ta derlendi, WebP dönüşümü için gerekli)
+COPY --from=deps /app/node_modules/sharp ./node_modules/sharp
+COPY --from=deps /app/node_modules/@img ./node_modules/@img
+COPY --from=deps /app/node_modules/detect-libc ./node_modules/detect-libc
+
 EXPOSE 3000
 CMD ["node", "server.js"]
