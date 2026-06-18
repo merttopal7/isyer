@@ -76,11 +76,13 @@ export async function POST(
   const filename = `${type}.${ext}`;
   await fs.writeFile(path.join(dir, filename), data);
 
-  const dbPath = `/uploads/businesses/${bId}/${filename}`;
+  // Version in the URL busts browser caches (especially for favicons which are cached aggressively).
+  // The uploads route ignores query params when reading the file from disk.
+  const dbPath = `/uploads/businesses/${bId}/${filename}?v=${Date.now()}`;
   const field = type === "logo" ? "logo_url" : "favicon_url";
   await db<Business>("businesses").where({ id: bId }).update({ [field]: dbPath });
 
-  return NextResponse.json({ url: `${dbPath}?v=${Date.now()}` });
+  return NextResponse.json({ url: dbPath });
 }
 
 export async function DELETE(

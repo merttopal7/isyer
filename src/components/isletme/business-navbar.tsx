@@ -59,7 +59,7 @@ export function BusinessNavbar({ slug, businessName, hasMap, logoUrl }: Props) {
         <div className="flex min-w-0 items-center gap-2 text-sm">
           <Link
             href={bizPath(slug, "/duyurular")}
-            className="flex min-w-0 items-center gap-1.5 font-medium hover:text-primary truncate"
+            className="flex min-w-0 items-center gap-1.5 font-medium hover:text-primary"
           >
             {logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -71,7 +71,7 @@ export function BusinessNavbar({ slug, businessName, hasMap, logoUrl }: Props) {
             ) : (
               <Building2 className="h-4 w-4 shrink-0 text-muted-foreground" />
             )}
-            <span className="truncate">{businessName}</span>
+            <span className="min-w-0 truncate">{businessName}</span>
           </Link>
         </div>
 
