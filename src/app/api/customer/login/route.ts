@@ -4,11 +4,12 @@ import { verifyCustomerPassword, signCustomerToken, setCustomerCookieOptions } f
 import type { Customer } from "@/types";
 
 export async function POST(req: NextRequest) {
-  const { phone, password } = await req.json();
+  const { phone: rawPhone, password } = await req.json();
 
-  if (!phone || !password) {
+  if (!rawPhone || !password) {
     return NextResponse.json({ error: "Telefon ve şifre gereklidir." }, { status: 400 });
   }
+  const phone = rawPhone.replace(/\D/g, "").slice(0, 11);
 
   const customer = await db<Customer>("customers").where({ phone }).first();
   if (!customer || !customer.password_hash) {

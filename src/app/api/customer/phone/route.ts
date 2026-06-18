@@ -8,7 +8,8 @@ export async function PUT(req: NextRequest) {
   const session = await getCustomerSession();
   if (!session) return NextResponse.json({ error: "Yetkisiz." }, { status: 401 });
 
-  const { phone } = await req.json();
+  const { phone: rawPhone } = await req.json();
+  const phone = (rawPhone ?? "").replace(/\D/g, "").slice(0, 11);
   if (!phone || !validatePhone(phone)) {
     return NextResponse.json({ error: "Geçersiz telefon numarası (05XXXXXXXXX)." }, { status: 400 });
   }

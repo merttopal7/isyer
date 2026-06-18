@@ -5,11 +5,12 @@ import { validatePhone } from "@/lib/slots";
 import type { Customer } from "@/types";
 
 export async function POST(req: NextRequest) {
-  const { phone, name, password } = await req.json();
+  const { phone: rawPhone, name, password } = await req.json();
 
-  if (!phone || !name || !password) {
+  if (!rawPhone || !name || !password) {
     return NextResponse.json({ error: "Tüm alanlar zorunludur." }, { status: 400 });
   }
+  const phone = rawPhone.replace(/\D/g, "").slice(0, 11);
   if (!validatePhone(phone)) {
     return NextResponse.json({ error: "Geçersiz telefon numarası (05XXXXXXXXX)." }, { status: 400 });
   }
