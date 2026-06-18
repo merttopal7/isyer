@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getBusinessBySlug } from "@/lib/get-business";
-import { MapPin, Navigation } from "lucide-react";
+import { MapPin, ExternalLink } from "lucide-react";
 
 const ALLOWED_MAP_ORIGIN = "https://www.google.com/maps/embed";
 
@@ -21,15 +21,8 @@ export default async function KonumPage({ params }: { params: Promise<{ slug: st
     );
   }
 
-  // Extract lat/lng from the embed pb parameter (!2d=lng, !3d=lat)
-  const lngMatch = mapSrc.match(/!2d(-?\d+\.\d+)/);
-  const latMatch = mapSrc.match(/!3d(-?\d+\.\d+)/);
-  const directionsUrl =
-    latMatch && lngMatch
-      ? `https://www.google.com/maps/dir/?api=1&destination=${latMatch[1]},${lngMatch[1]}`
-      : business.address
-      ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(business.address)}`
-      : `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(business.name)}`;
+  // Embed URL'inden /embed kaldırarak aynı konumu Google Maps'te aç
+  const mapsUrl = mapSrc.replace("https://www.google.com/maps/embed", "https://www.google.com/maps");
 
   return (
     <div className="space-y-4">
@@ -43,13 +36,13 @@ export default async function KonumPage({ params }: { params: Promise<{ slug: st
           <div />
         )}
         <a
-          href={directionsUrl}
+          href={mapsUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-opacity hover:opacity-90"
         >
-          <Navigation className="h-4 w-4" />
-          Yol Tarifi Al
+          <ExternalLink className="h-4 w-4" />
+          Haritada Aç
         </a>
       </div>
       <div className="overflow-hidden rounded-xl border shadow-sm">
