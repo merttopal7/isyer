@@ -23,7 +23,6 @@ export function proxy(request: NextRequest) {
       pathname.startsWith("/admin/") ||
       pathname.startsWith("/_next/") ||
       pathname === "/favicon.ico" ||
-      pathname === "/kayit" ||
       pathname === "/randevu-sorgula" ||
       pathname === "/randevularim"
     ) {

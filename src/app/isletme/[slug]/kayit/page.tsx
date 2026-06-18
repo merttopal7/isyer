@@ -7,8 +7,9 @@ import { bizPath } from "@/lib/url";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, LogIn, Calendar } from "lucide-react";
-import type { CustomerJwtPayload } from "@/types";
+import { Loader2, UserPlus, CheckCircle2 } from "lucide-react";
+import { validatePhone } from "@/lib/slots";
+import { cn } from "@/lib/utils";
 
 function GoogleIcon() {
   return (
@@ -21,52 +22,52 @@ function GoogleIcon() {
   );
 }
 
-function LoginForm() {
+function RegisterForm() {
   const router = useRouter();
   const params = useParams<{ slug: string }>();
   const searchParams = useSearchParams();
-  const base = `/isletme/${params.slug}`;
+  const base = bizPath(params.slug);
   const redirect = searchParams.get("redirect") ?? base;
-  const oauthError = searchParams.get("error");
 
+  const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(
-    oauthError === "google_cancelled" ? "Google girişi iptal edildi." :
-    oauthError ? "Google ile giriş sırasında bir hata oluştu." : ""
-  );
+  const [phoneTouched, setPhoneTouched] = useState(false);
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  function handleGoogleLogin() {
-    window.location.href = `/api/auth/google?redirect=${encodeURIComponent(redirect)}`;
-  }
+  const phoneValid = validatePhone(phone);
+  const showPhoneError = phoneTouched && phone.length > 0 && !phoneValid;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    if (!phoneValid) { setError("Geçerli bir Türkiye telefon numarası girin."); return; }
     setLoading(true);
     try {
-      const res = await fetch("/api/customer/login", {
+      const res = await fetch("/api/customer/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone, password }),
+        body: JSON.stringify({ phone, name, password }),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.error ?? "Giriş yapılamadı."); return; }
-      window.dispatchEvent(
-        new CustomEvent("customer-auth-changed", { detail: data as CustomerJwtPayload })
-      );
+      if (!res.ok) { setError(data.error ?? "Kayıt olunamadı."); return; }
       router.push(redirect);
+      router.refresh();
     } finally {
       setLoading(false);
     }
+  }
+
+  function handleGoogleLogin() {
+    window.location.href = `/api/auth/google?redirect=${encodeURIComponent(redirect)}`;
   }
 
   return (
     <div className="space-y-4">
       <Button type="button" variant="outline" className="w-full gap-2" onClick={handleGoogleLogin}>
         <GoogleIcon />
-        Google ile Giriş Yap
+        Google ile Kayıt Ol / Giriş Yap
       </Button>
 
       <div className="relative">
@@ -74,7 +75,7 @@ function LoginForm() {
           <div className="w-full border-t" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-card px-2 text-muted-foreground">veya</span>
+          <span className="bg-card px-2 text-muted-foreground">veya telefon ile</span>
         </div>
       </div>
 
@@ -83,26 +84,47 @@ function LoginForm() {
           <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</p>
         )}
         <div className="space-y-1.5">
+          <Label htmlFor="name">Ad Soyad</Label>
+          <Input id="name" placeholder="Ahmet Yılmaz" value={name}
+            onChange={(e) => setName(e.target.value)} autoComplete="name" required />
+        </div>
+        <div className="space-y-1.5">
           <Label htmlFor="phone">Telefon Numarası</Label>
-          <Input id="phone" type="tel" placeholder="05XX XXX XX XX" value={phone}
-            onChange={(e) => setPhone(e.target.value)} autoComplete="tel" required />
+          <Input
+            id="phone" type="tel" placeholder="05XX XXX XX XX" value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            onBlur={() => setPhoneTouched(true)}
+            autoComplete="tel" required
+            className={cn(
+              showPhoneError && "border-destructive focus-visible:ring-destructive/20",
+              phoneValid && phone.length > 0 && "border-green-500 focus-visible:ring-green-500/20"
+            )}
+          />
+          {showPhoneError ? (
+            <p className="text-xs text-destructive">Geçerli bir Türkiye telefon numarası girin (05XXXXXXXXX).</p>
+          ) : phoneValid && phone.length > 0 ? (
+            <p className="flex items-center gap-1 text-xs text-green-600">
+              <CheckCircle2 className="h-3 w-3" /> Geçerli
+            </p>
+          ) : null}
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="password">Şifre</Label>
-          <Input id="password" type="password" placeholder="••••••" value={password}
-            onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" required />
+          <Input id="password" type="password" placeholder="En az 6 karakter" value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="new-password" required minLength={6} />
         </div>
         <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LogIn className="mr-2 h-4 w-4" />}
-          Giriş Yap
+          {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserPlus className="mr-2 h-4 w-4" />}
+          Kayıt Ol
         </Button>
         <p className="text-center text-sm text-muted-foreground">
-          Hesabınız yok mu?{" "}
+          Zaten hesabınız var mı?{" "}
           <Link
-            href={`${bizPath(params.slug, "/kayit")}${redirect !== base ? `?redirect=${encodeURIComponent(redirect)}` : ""}`}
+            href={`${bizPath(params.slug, "/giris")}${redirect !== base ? `?redirect=${encodeURIComponent(redirect)}` : ""}`}
             className="text-primary underline-offset-2 hover:underline"
           >
-            Kayıt olun
+            Giriş yapın
           </Link>
         </p>
       </form>
@@ -110,22 +132,17 @@ function LoginForm() {
   );
 }
 
-export default function IsletmeGirisPage() {
+export default function IsletmeKayitPage() {
   return (
     <div className="flex flex-1 items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <div className="mb-3 flex justify-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-              <Calendar className="h-6 w-6 text-primary" />
-            </div>
-          </div>
-          <h1 className="text-2xl font-bold">Müşteri Girişi</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Telefon numaranız ile giriş yapın.</p>
+          <h1 className="text-2xl font-bold">Hesap Oluştur</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Telefon numaranız ile ücretsiz kayıt olun.</p>
         </div>
         <div className="rounded-xl border bg-card p-6 shadow-sm">
           <Suspense>
-            <LoginForm />
+            <RegisterForm />
           </Suspense>
         </div>
       </div>
