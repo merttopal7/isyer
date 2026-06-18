@@ -33,16 +33,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Bu slug zaten kullanımda." }, { status: 409 });
   }
 
-  const [id] = await db<Business>("businesses").insert({
-    name,
-    slug: slug.toLowerCase().replace(/\s+/g, "-"),
-    category,
-    description: description ?? null,
-    phone: phone ?? null,
-    address: address ?? null,
-    status: "active",
-  });
-
-  const business = await db<Business>("businesses").where({ id }).first();
+  const [business] = await db<Business>("businesses")
+    .insert({
+      name,
+      slug: slug.toLowerCase().replace(/\s+/g, "-"),
+      category,
+      description: description ?? null,
+      phone: phone ?? null,
+      address: address ?? null,
+      status: "active",
+    })
+    .returning("*");
   return NextResponse.json(business, { status: 201 });
 }

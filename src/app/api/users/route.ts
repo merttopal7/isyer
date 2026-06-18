@@ -35,17 +35,14 @@ export async function POST(req: NextRequest) {
 
   const password_hash = await hashPassword(password);
 
-  const [id] = await db<User>("users").insert({
-    email,
-    password_hash,
-    role: "business_admin",
-    business_id: Number(business_id),
-  });
-
-  const user = await db<User>("users")
-    .select("id", "email", "role", "business_id", "created_at")
-    .where({ id })
-    .first();
+  const [user] = await db<User>("users")
+    .insert({
+      email,
+      password_hash,
+      role: "business_admin",
+      business_id: Number(business_id),
+    })
+    .returning("*");
 
   return NextResponse.json(user, { status: 201 });
 }

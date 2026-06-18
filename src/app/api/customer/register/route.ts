@@ -28,7 +28,9 @@ export async function POST(req: NextRequest) {
   const password_hash = await hashCustomerPassword(password);
   const trimmedName = name.trim();
 
-  const [id] = await db<Customer>("customers").insert({ phone, name: trimmedName, password_hash });
+  const [{ id }] = await db<Customer>("customers")
+    .insert({ phone, name: trimmedName, password_hash })
+    .returning("id");
 
   const token = signCustomerToken({ customerId: id, phone, name: trimmedName });
   const res = NextResponse.json({ customerId: id, phone, name: trimmedName });

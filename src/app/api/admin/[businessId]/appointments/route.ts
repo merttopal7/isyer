@@ -73,21 +73,21 @@ export async function POST(
     booking_code = generateBookingCode();
   } while (await db<Appointment>("appointments").where({ booking_code }).first());
 
-  const [id] = await db<Appointment>("appointments").insert({
-    business_id: bId,
-    service_id: Number(service_id),
-    staff_id: assignedStaffId,
-    customer_id: null,
-    customer_name: customer_name.trim(),
-    customer_phone: customer_phone.trim(),
-    appointment_date,
-    start_time: slot.start,
-    end_time: slot.end,
-    status: "approved",
-    reject_reason: null,
-    booking_code,
-  });
-
-  const created = await db<Appointment>("appointments").where({ id }).first();
+  const [created] = await db<Appointment>("appointments")
+    .insert({
+      business_id: bId,
+      service_id: Number(service_id),
+      staff_id: assignedStaffId,
+      customer_id: null,
+      customer_name: customer_name.trim(),
+      customer_phone: customer_phone.trim(),
+      appointment_date,
+      start_time: slot.start,
+      end_time: slot.end,
+      status: "approved",
+      reject_reason: null,
+      booking_code,
+    })
+    .returning("*");
   return NextResponse.json(created, { status: 201 });
 }

@@ -37,13 +37,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Bu tarih zaten kapalı." }, { status: 409 });
   }
 
-  const [id] = await db<ClosedDate>("closed_dates").insert({
-    business_id: Number(business_id),
-    date,
-    reason: reason ?? null,
-  });
-
-  const created = await db<ClosedDate>("closed_dates").where({ id }).first();
+  const [created] = await db<ClosedDate>("closed_dates")
+    .insert({
+      business_id: Number(business_id),
+      date,
+      reason: reason ?? null,
+    })
+    .returning("*");
   return NextResponse.json(created, { status: 201 });
 }
 

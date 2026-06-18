@@ -29,14 +29,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Yetkisiz." }, { status: 403 });
   }
 
-  const [id] = await db<Service>("services").insert({
-    business_id: Number(business_id),
-    name,
-    duration_minutes: Number(duration_minutes),
-    price: price ? Number(price) : null,
-    is_active: true,
-  });
-
-  const service = await db<Service>("services").where({ id }).first();
+  const [service] = await db<Service>("services")
+    .insert({
+      business_id: Number(business_id),
+      name,
+      duration_minutes: Number(duration_minutes),
+      price: price ? Number(price) : null,
+      is_active: true,
+    })
+    .returning("*");
   return NextResponse.json(service, { status: 201 });
 }

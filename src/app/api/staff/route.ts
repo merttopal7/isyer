@@ -29,12 +29,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Yetkisiz." }, { status: 403 });
   }
 
-  const [id] = await db<StaffOrResource>("staff_or_resources").insert({
-    business_id: Number(business_id),
-    name,
-    is_active: true,
-  });
-
-  const staff = await db<StaffOrResource>("staff_or_resources").where({ id }).first();
+  const [staff] = await db<StaffOrResource>("staff_or_resources")
+    .insert({
+      business_id: Number(business_id),
+      name,
+      is_active: true,
+    })
+    .returning("*");
   return NextResponse.json(staff, { status: 201 });
 }

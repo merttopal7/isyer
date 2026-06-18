@@ -86,14 +86,16 @@ export async function GET(req: NextRequest) {
       await db<Customer>("customers").where({ id: customer.id }).update({ google_id: profile.id });
     } else {
       // Create new customer
-      const [id] = await db<Customer>("customers").insert({
-        google_id: profile.id,
-        email: profile.email,
-        name: profile.name,
-        phone: null,
-        password_hash: null,
-      });
-      customer = await db<Customer>("customers").where({ id }).first() as Customer;
+      const [created] = await db<Customer>("customers")
+        .insert({
+          google_id: profile.id,
+          email: profile.email,
+          name: profile.name,
+          phone: null,
+          password_hash: null,
+        })
+        .returning("*");
+      customer = created as Customer;
     }
   }
 

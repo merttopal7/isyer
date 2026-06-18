@@ -31,14 +31,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Yetkisiz." }, { status: 403 });
   }
 
-  const [id] = await db<Announcement>("announcements").insert({
-    business_id: Number(business_id),
-    title: title.trim(),
-    content: content.trim(),
-    is_pinned: Boolean(is_pinned),
-    is_published: Boolean(is_published),
-  });
-
-  const row = await db<Announcement>("announcements").where({ id }).first();
+  const [row] = await db<Announcement>("announcements")
+    .insert({
+      business_id: Number(business_id),
+      title: title.trim(),
+      content: content.trim(),
+      is_pinned: Boolean(is_pinned),
+      is_published: Boolean(is_published),
+    })
+    .returning("*");
   return NextResponse.json(row, { status: 201 });
 }
