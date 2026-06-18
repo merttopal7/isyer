@@ -103,11 +103,25 @@ export function generateBookingCode(): string {
   return Array.from({ length: 8 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
 }
 
-export function formatPhone(raw: string): string {
-  return raw.replace(/\D/g, "");
+/** Ham rakamları → "0 (5XX) XXX XXXX" görsel formatına çevirir */
+export function formatPhoneDisplay(value: string): string {
+  const d = value.replace(/\D/g, "").slice(0, 11);
+  let out = "";
+  for (let i = 0; i < d.length; i++) {
+    if (i === 1) out += " (";
+    else if (i === 4) out += ") ";
+    else if (i === 7) out += " ";
+    out += d[i];
+  }
+  return out;
 }
 
+/** Ham rakamlar çıkarır (state / API'ye gönderim için) */
+export function extractPhoneDigits(value: string): string {
+  return value.replace(/\D/g, "").slice(0, 11);
+}
+
+/** Türk mobil numarası mı? Hem raw hem formatlanmış değer kabul eder */
 export function validatePhone(phone: string): boolean {
-  const digits = formatPhone(phone);
-  return /^(05\d{9}|5\d{9}|\+905\d{9})$/.test(digits.replace(/^0/, "0").replace(/^\+90/, "0"));
+  return /^05\d{9}$/.test(phone.replace(/\D/g, ""));
 }

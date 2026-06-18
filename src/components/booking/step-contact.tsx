@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, Loader2, CalendarCheck, CheckCircle2, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { validatePhone } from "@/lib/slots";
+import { PhoneInput } from "@/components/shared/phone-input";
 import type { BookingState } from "./booking-flow";
 import type { CustomerJwtPayload } from "@/types";
 
@@ -93,12 +94,15 @@ export function StepContact({ booking, customer, onChange, onSubmit, onBack, sub
         <div className="space-y-1.5">
           <Label htmlFor="phone">Telefon Numarası *</Label>
           <div className="relative">
-            <Input
+            <PhoneInput
               id="phone"
-              type="tel"
-              placeholder="05XX XXX XX XX"
               value={customerPhone}
-              onChange={(e) => !phoneReadonly && onChange("customerPhone", e.target.value)}
+              onValueChange={(raw) => {
+                if (!phoneReadonly) {
+                  onChange("customerPhone", raw);
+                  setPhoneTouched(true);
+                }
+              }}
               onBlur={() => !phoneReadonly && setPhoneTouched(true)}
               readOnly={phoneReadonly}
               autoComplete="tel"
@@ -117,9 +121,7 @@ export function StepContact({ booking, customer, onChange, onSubmit, onBack, sub
               <CheckCircle2 className="h-3 w-3 text-green-600" /> Hesabınıza kayıtlı numara
             </p>
           ) : showPhoneError ? (
-            <p className="text-xs text-destructive">
-              Geçerli bir Türkiye telefon numarası girin (05XXXXXXXXX).
-            </p>
+            <p className="text-xs text-destructive">Format: 0 (5XX) XXX XXXX</p>
           ) : phoneValid && customerPhone.length > 0 ? (
             <p className="flex items-center gap-1 text-xs text-green-600">
               <CheckCircle2 className="h-3 w-3" /> Geçerli

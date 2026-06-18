@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Navbar } from "@/components/shared/navbar";
 import { Loader2, UserPlus, Calendar, CheckCircle2 } from "lucide-react";
 import { validatePhone } from "@/lib/slots";
+import { PhoneInput } from "@/components/shared/phone-input";
 import { cn } from "@/lib/utils";
 
 function GoogleIcon() {
@@ -88,18 +89,20 @@ function RegisterForm() {
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="phone">Telefon Numarası</Label>
-        <Input
-          id="phone" type="tel" placeholder="05XX XXX XX XX" value={phone}
-          onChange={(e) => setPhone(e.target.value)}
+        <PhoneInput
+          id="phone"
+          value={phone}
+          onValueChange={(raw) => { setPhone(raw); setPhoneTouched(true); }}
           onBlur={() => setPhoneTouched(true)}
-          autoComplete="tel" required
+          autoComplete="tel"
+          required
           className={cn(
             showPhoneError && "border-destructive focus-visible:ring-destructive/20",
             phoneValid && phone.length > 0 && "border-green-500 focus-visible:ring-green-500/20"
           )}
         />
         {showPhoneError ? (
-          <p className="text-xs text-destructive">Geçerli bir Türkiye telefon numarası girin (05XXXXXXXXX).</p>
+          <p className="text-xs text-destructive">Format: 0 (5XX) XXX XXXX</p>
         ) : phoneValid && phone.length > 0 ? (
           <p className="flex items-center gap-1 text-xs text-green-600">
             <CheckCircle2 className="h-3 w-3" /> Geçerli

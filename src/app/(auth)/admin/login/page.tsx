@@ -85,9 +85,7 @@ export default function AdminLoginPage() {
             </Button>
           </form>
 
-          <p className="mt-4 text-center text-xs text-muted-foreground">
-            Demo: admin@platform.com / admin123
-          </p>
+
         </CardContent>
       </Card>
     </div>

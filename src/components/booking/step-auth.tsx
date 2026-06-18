@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2, LogIn, UserPlus, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { validatePhone } from "@/lib/slots";
+import { PhoneInput } from "@/components/shared/phone-input";
 import type { CustomerJwtPayload } from "@/types";
 
 interface Props {
@@ -22,7 +23,11 @@ export function StepAuth({ onAuthenticated }: Props) {
 
   // login fields
   const [loginPhone, setLoginPhone] = useState("");
+  const [loginPhoneTouched, setLoginPhoneTouched] = useState(false);
   const [loginPassword, setLoginPassword] = useState("");
+
+  const loginPhoneValid = validatePhone(loginPhone);
+  const showLoginPhoneError = loginPhoneTouched && loginPhone.length > 0 && !loginPhoneValid;
 
   // register fields
   const [regName, setRegName] = useState("");
@@ -137,15 +142,25 @@ export function StepAuth({ onAuthenticated }: Props) {
         <form onSubmit={handleLogin} className="space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="login-phone">Telefon Numarası</Label>
-            <Input
+            <PhoneInput
               id="login-phone"
-              type="tel"
-              placeholder="05XX XXX XX XX"
               value={loginPhone}
-              onChange={(e) => setLoginPhone(e.target.value)}
+              onValueChange={(raw) => { setLoginPhone(raw); setLoginPhoneTouched(true); }}
+              onBlur={() => setLoginPhoneTouched(true)}
               autoComplete="tel"
               required
+              className={cn(
+                showLoginPhoneError && "border-destructive focus-visible:ring-destructive/20",
+                loginPhoneValid && loginPhone.length > 0 && "border-green-500 focus-visible:ring-green-500/20"
+              )}
             />
+            {showLoginPhoneError ? (
+              <p className="text-xs text-destructive">Format: 0 (5XX) XXX XXXX</p>
+            ) : loginPhoneValid && loginPhone.length > 0 ? (
+              <p className="flex items-center gap-1 text-xs text-green-600">
+                <CheckCircle2 className="h-3 w-3" /> Geçerli
+              </p>
+            ) : null}
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="login-password">Şifre</Label>
@@ -185,22 +200,20 @@ export function StepAuth({ onAuthenticated }: Props) {
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="reg-phone">Telefon Numarası</Label>
-            <Input
+            <PhoneInput
               id="reg-phone"
-              type="tel"
-              placeholder="05XX XXX XX XX"
               value={regPhone}
-              onChange={(e) => setRegPhone(e.target.value)}
+              onValueChange={(raw) => { setRegPhone(raw); setRegPhoneTouched(true); }}
               onBlur={() => setRegPhoneTouched(true)}
               autoComplete="tel"
+              required
               className={cn(
                 showRegPhoneError && "border-destructive focus-visible:ring-destructive/20",
                 regPhoneValid && regPhone.length > 0 && "border-green-500 focus-visible:ring-green-500/20"
               )}
-              required
             />
             {showRegPhoneError ? (
-              <p className="text-xs text-destructive">Geçerli bir Türkiye telefon numarası girin (05XXXXXXXXX).</p>
+              <p className="text-xs text-destructive">Format: 0 (5XX) XXX XXXX</p>
             ) : regPhoneValid && regPhone.length > 0 ? (
               <p className="flex items-center gap-1 text-xs text-green-600">
                 <CheckCircle2 className="h-3 w-3" /> Geçerli

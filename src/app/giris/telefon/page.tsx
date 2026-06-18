@@ -3,10 +3,10 @@
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Phone, CheckCircle2 } from "lucide-react";
 import { validatePhone } from "@/lib/slots";
+import { PhoneInput } from "@/components/shared/phone-input";
 import { cn } from "@/lib/utils";
 
 function PhoneForm() {
@@ -60,12 +60,10 @@ function PhoneForm() {
       )}
       <div className="space-y-1.5">
         <Label htmlFor="phone">Telefon Numarası</Label>
-        <Input
+        <PhoneInput
           id="phone"
-          type="tel"
-          placeholder="05XX XXX XX XX"
           value={phone}
-          onChange={(e) => setPhone(e.target.value)}
+          onValueChange={(raw) => { setPhone(raw); setPhoneTouched(true); }}
           onBlur={() => setPhoneTouched(true)}
           autoComplete="tel"
           required
@@ -76,9 +74,7 @@ function PhoneForm() {
           )}
         />
         {showPhoneError ? (
-          <p className="text-xs text-destructive">
-            Geçerli bir Türkiye telefon numarası girin (05XXXXXXXXX).
-          </p>
+          <p className="text-xs text-destructive">Format: 0 (5XX) XXX XXXX</p>
         ) : phoneValid && phone.length > 0 ? (
           <p className="flex items-center gap-1 text-xs text-green-600">
             <CheckCircle2 className="h-3 w-3" /> Geçerli

@@ -7,7 +7,10 @@ import { bizPath, googleAuthUrl } from "@/lib/url";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, LogIn, Calendar } from "lucide-react";
+import { Loader2, LogIn, Calendar, CheckCircle2 } from "lucide-react";
+import { validatePhone } from "@/lib/slots";
+import { PhoneInput } from "@/components/shared/phone-input";
+import { cn } from "@/lib/utils";
 import type { CustomerJwtPayload } from "@/types";
 
 function GoogleIcon() {
@@ -30,12 +33,16 @@ function LoginForm() {
   const oauthError = searchParams.get("error");
 
   const [phone, setPhone] = useState("");
+  const [phoneTouched, setPhoneTouched] = useState(false);
   const [password, setPassword] = useState("");
   const [error, setError] = useState(
     oauthError === "google_cancelled" ? "Google girişi iptal edildi." :
     oauthError ? "Google ile giriş sırasında bir hata oluştu." : ""
   );
   const [loading, setLoading] = useState(false);
+
+  const phoneValid = validatePhone(phone);
+  const showPhoneError = phoneTouched && phone.length > 0 && !phoneValid;
 
   function handleGoogleLogin() {
     window.location.href = googleAuthUrl(params.slug, redirect);
@@ -84,8 +91,25 @@ function LoginForm() {
         )}
         <div className="space-y-1.5">
           <Label htmlFor="phone">Telefon Numarası</Label>
-          <Input id="phone" type="tel" placeholder="05XX XXX XX XX" value={phone}
-            onChange={(e) => setPhone(e.target.value)} autoComplete="tel" required />
+          <PhoneInput
+            id="phone"
+            value={phone}
+            onValueChange={(raw) => { setPhone(raw); setPhoneTouched(true); }}
+            onBlur={() => setPhoneTouched(true)}
+            autoComplete="tel"
+            required
+            className={cn(
+              showPhoneError && "border-destructive focus-visible:ring-destructive/20",
+              phoneValid && phone.length > 0 && "border-green-500 focus-visible:ring-green-500/20"
+            )}
+          />
+          {showPhoneError ? (
+            <p className="text-xs text-destructive">Format: 0 (5XX) XXX XXXX</p>
+          ) : phoneValid && phone.length > 0 ? (
+            <p className="flex items-center gap-1 text-xs text-green-600">
+              <CheckCircle2 className="h-3 w-3" /> Geçerli
+            </p>
+          ) : null}
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="password">Şifre</Label>
