@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import db from "@/lib/db";
-import { getCustomerSession } from "@/lib/customer-auth";
+import { getCustomerSession, signCustomerToken, setCustomerCookieOptions } from "@/lib/customer-auth";
 import { validatePhone } from "@/lib/slots";
 import type { Customer } from "@/types";
 
@@ -23,5 +23,14 @@ export async function PUT(req: NextRequest) {
   }
 
   await db<Customer>("customers").where({ id: session.customerId }).update({ phone });
-  return NextResponse.json({ ok: true });
+
+  // Issue new token with the updated phone number
+  const newPayload = {
+    ...session,
+    phone: phone
+  };
+  const newToken = signCustomerToken(newPayload);
+  const res = NextResponse.json({ ok: true });
+  res.cookies.set(setCustomerCookieOptions(newToken));
+  return res;
 }
