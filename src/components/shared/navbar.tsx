@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { ThemeToggle } from "./theme-toggle";
 import { Button } from "@/components/ui/button";
 import { User, LogOut, ChevronDown, LayoutDashboard, Calendar } from "lucide-react";
@@ -56,7 +55,6 @@ export function Navbar() {
 }
 
 function CustomerMenu({ customer, onLogout }: { customer: CustomerJwtPayload; onLogout: () => void }) {
-  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [switching, setSwitching] = useState(false);
 
@@ -65,7 +63,11 @@ function CustomerMenu({ customer, onLogout }: { customer: CustomerJwtPayload; on
     try {
       const res = await fetch("/api/customer/switch-to-admin", { method: "POST" });
       const data = await res.json();
-      if (res.ok) router.push(`/admin`);
+      if (res.ok) {
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL
+          ?? `https://www.${process.env.NEXT_PUBLIC_BASE_DOMAIN ?? "isyer.com"}`;
+        window.location.href = `${appUrl}/admin/${data.businessId}/randevular`;
+      }
     } finally {
       setSwitching(false);
     }
