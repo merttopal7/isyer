@@ -129,7 +129,10 @@ function CustomerMenu({ customer, onLogout, slug }: { customer: CustomerJwtPaylo
     try {
       const res = await fetch("/api/customer/switch-to-admin", { method: "POST" });
       const data = await res.json();
-      if (res.ok) window.location.href = `/admin/${data.businessId}`;
+      if (res.ok) {
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
+        window.location.href = `${appUrl}/admin/${data.businessId}`;
+      }
     } finally {
       setSwitching(false);
     }
