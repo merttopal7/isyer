@@ -26,6 +26,7 @@ import { PhoneInput } from "@/components/shared/phone-input";
 
 export type EnrichedAppointment = {
   id: number;
+  customer_id: number | null;
   service_name: string;
   staff_name: string | null;
   customer_name: string;
@@ -155,12 +156,13 @@ function toWaPhone(phone: string): string {
   return `+90${d}`;
 }
 
-function waLink(appt: EnrichedAppointment): string {
+function waLink(appt: EnrichedAppointment, businessSlug: string): string {
   const phone = toWaPhone(appt.customer_phone);
   const date = formatDateDisplay(appt.appointment_date);
+  const apptUrl = `\nRandevu detaylarınız: ${bizUrl(businessSlug, `/randevu/${appt.booking_code}`, typeof window !== "undefined" ? window.location.origin : "")}`;
   const texts: Record<AppointmentStatus, string> = {
-    pending:          `Merhaba ${appt.customer_name}, ${appt.service_name} randevunuz (${date} ${appt.start_time}) alındı ve onay bekleniyor. Randevu kodunuz: ${appt.booking_code}`,
-    approved:         `Merhaba ${appt.customer_name}, ${appt.service_name} randevunuz ${date} ${appt.start_time} için onaylanmıştır. Randevu kodunuz: ${appt.booking_code}`,
+    pending:          `Merhaba ${appt.customer_name}, ${appt.service_name} randevunuz (${date} ${appt.start_time}) alındı ve onay bekleniyor. Randevu kodunuz: ${appt.booking_code}${apptUrl}`,
+    approved:         `Merhaba ${appt.customer_name}, ${appt.service_name} randevunuz ${date} ${appt.start_time} için onaylanmıştır. Randevu kodunuz: ${appt.booking_code}${apptUrl}`,
     rejected:         `Merhaba ${appt.customer_name}, ${appt.service_name} randevunuz maalesef uygun değildir.${appt.reject_reason ? ` Sebep: ${appt.reject_reason}` : ""}`,
     cancelled:        `Merhaba ${appt.customer_name}, ${appt.service_name} randevunuz (${date} ${appt.start_time}) iptal edilmiştir.`,
     cancel_requested: `Merhaba ${appt.customer_name}, iptal talebiniz alınmıştır. En kısa sürede sizinle iletişime geçeceğiz.`,
@@ -170,14 +172,14 @@ function waLink(appt: EnrichedAppointment): string {
 
 const WA_STATUSES: AppointmentStatus[] = ["pending", "approved", "cancel_requested", "cancelled"];
 
-function WaButton({ appt, size = "sm" }: { appt: EnrichedAppointment; size?: "sm" | "xs" }) {
+function WaButton({ appt, size = "sm", businessSlug }: { appt: EnrichedAppointment; size?: "sm" | "xs"; businessSlug: string }) {
   if (!WA_STATUSES.includes(appt.status)) return null;
   const now = new Date();
   const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
   if (!isFuture(appt.appointment_date, appt.start_time, todayStr)) return null;
   return (
     <a
-      href={waLink(appt)}
+      href={waLink(appt, businessSlug)}
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
@@ -201,6 +203,7 @@ function ApptCard({
   onDelete,
   onCheckIn,
   onClose,
+  businessSlug,
 }: {
   appt: EnrichedAppointment;
   todayKey: string;
@@ -209,6 +212,7 @@ function ApptCard({
   onDelete: (id: number) => void;
   onCheckIn: (id: number, value: boolean | null) => void;
   onClose?: () => void;
+  businessSlug: string;
 }) {
   const s = STATUS_META[appt.status];
   const future = isFuture(appt.appointment_date, appt.start_time, todayKey);
@@ -224,7 +228,7 @@ function ApptCard({
           </p>
           <div className="mt-1 flex items-center gap-1.5">
             <span className="font-mono text-xs text-muted-foreground">{appt.booking_code}</span>
-            <WaButton appt={appt} size="xs" />
+            <WaButton appt={appt} size="xs" businessSlug={businessSlug} />
           </div>
         </div>
         <Badge variant={s.variant} className="shrink-0 text-xs">{s.label}</Badge>
@@ -795,7 +799,7 @@ export function RandevularClient({
                   </div>
                   <div className="mt-1 flex items-center gap-2">
                     <p className="font-mono text-xs text-muted-foreground">{a.booking_code}</p>
-                    <WaButton appt={a} size="xs" />
+                    <WaButton appt={a} size="xs" businessSlug={businessSlug} />
                   </div>
                   {a.status === "rejected" && a.reject_reason && (
                     <p className="mt-1 rounded bg-destructive/10 px-2 py-1 text-xs text-destructive">{a.reject_reason}</p>
@@ -891,7 +895,7 @@ export function RandevularClient({
                       <TableCell>
                         <div className="flex items-center gap-1.5">
                           <span className="font-mono text-xs">{a.booking_code}</span>
-                          <WaButton appt={a} size="xs" />
+                          <WaButton appt={a} size="xs" businessSlug={businessSlug} />
                         </div>
                       </TableCell>
                       <TableCell>
@@ -1424,6 +1428,7 @@ export function RandevularClient({
                             onOpen={openAction}
                             onDelete={deleteAppointment}
                             onCheckIn={setCheckIn}
+                            businessSlug={businessSlug}
                           />
                         ))}
                     </div>
@@ -1683,6 +1688,7 @@ export function RandevularClient({
                 onDelete={deleteAppointment}
                 onCheckIn={setCheckIn}
                 onClose={() => setGroupPopup(null)}
+                businessSlug={businessSlug}
               />
             ))}
           </div>
@@ -1712,7 +1718,7 @@ export function RandevularClient({
                     <span className="block">{formatDateDisplay(detailAppt.appointment_date)} · {detailAppt.start_time}–{detailAppt.end_time}</span>
                     <span className="flex items-center gap-2 font-mono text-xs text-muted-foreground">
                       {detailAppt.booking_code}
-                      <WaButton appt={detailAppt} size="xs" />
+                      <WaButton appt={detailAppt} size="xs" businessSlug={businessSlug} />
                     </span>
                     {detailAppt.status === "rejected" && detailAppt.reject_reason && (
                       <span className="block rounded bg-destructive/10 px-2 py-1 text-xs text-destructive">{detailAppt.reject_reason}</span>
