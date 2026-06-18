@@ -98,7 +98,7 @@ function LoginForm() {
         <p className="text-center text-sm text-muted-foreground">
           Hesabınız yok mu?{" "}
           <Link
-            href={`${base}/kayit${redirect !== base ? `?redirect=${encodeURIComponent(redirect)}` : ""}`}
+            href={`/kayit${redirect !== base ? `?redirect=${encodeURIComponent(redirect)}` : ""}`}
             className="text-primary underline-offset-2 hover:underline"
           >
             Kayıt olun

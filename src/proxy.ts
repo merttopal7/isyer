@@ -16,13 +16,16 @@ export function proxy(request: NextRequest) {
     const slug = hostname.slice(0, -(DOMAIN.length + 1));
     if (!slug || slug === "www") return NextResponse.next();
 
-    // Sistem yollarına ve zaten /isletme/ altına dokunma
+    // Platform genelinde sayfalar ve sistem yolları — rewrite yapma
     if (
       pathname.startsWith("/isletme/") ||
       pathname.startsWith("/api/") ||
       pathname.startsWith("/admin/") ||
       pathname.startsWith("/_next/") ||
-      pathname === "/favicon.ico"
+      pathname === "/favicon.ico" ||
+      pathname === "/kayit" ||
+      pathname === "/randevu-sorgula" ||
+      pathname === "/randevularim"
     ) {
       return NextResponse.next();
     }
