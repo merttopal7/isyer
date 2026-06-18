@@ -66,7 +66,7 @@ export function BusinessNavbar({ slug, businessName, hasMap, logoUrl }: Props) {
               <img
                 src={logoUrl}
                 alt={businessName}
-                className="h-7 w-7 rounded-full object-cover shrink-0"
+                className="h-7 w-7 object-cover shrink-0"
               />
             ) : (
               <Building2 className="h-4 w-4 shrink-0 text-muted-foreground" />
