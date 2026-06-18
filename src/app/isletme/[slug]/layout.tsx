@@ -41,12 +41,14 @@ export default async function IsletmeLayout({ children, params }: Props) {
       <BusinessNavbar slug={slug} businessName={business.name} hasMap={!!business.map_embed} logoUrl={business.logo_url ?? null} />
 
       <BusinessHeader
+        slug={slug}
         name={business.name}
         category={business.category}
         description={business.description ?? null}
         phone={business.phone ?? null}
         address={business.address ?? null}
         logoUrl={business.logo_url ?? null}
+        hasMap={!!business.map_embed}
       />
 
       {/* Page content */}

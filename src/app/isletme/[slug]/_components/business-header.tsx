@@ -1,17 +1,21 @@
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Phone, Building2 } from "lucide-react";
 import { LogoLightbox } from "./logo-lightbox";
+import { bizPath } from "@/lib/url";
 
 interface Props {
+  slug: string;
   name: string;
   category: string;
   description: string | null;
   phone: string | null;
   address: string | null;
   logoUrl?: string | null;
+  hasMap: boolean;
 }
 
-export function BusinessHeader({ name, category, description, phone, address, logoUrl }: Props) {
+export function BusinessHeader({ slug, name, category, description, phone, address, logoUrl, hasMap }: Props) {
   return (
     <section className="border-b bg-muted/30 py-8">
       <div className="container mx-auto max-w-4xl px-4">
@@ -38,9 +42,18 @@ export function BusinessHeader({ name, category, description, phone, address, lo
                 </span>
               )}
               {address && (
-                <span className="flex items-center gap-1">
-                  <MapPin className="h-3.5 w-3.5" /> {address}
-                </span>
+                hasMap ? (
+                  <Link
+                    href={bizPath(slug, "/konum")}
+                    className="flex items-center gap-1 hover:text-primary transition-colors"
+                  >
+                    <MapPin className="h-3.5 w-3.5" /> {address}
+                  </Link>
+                ) : (
+                  <span className="flex items-center gap-1">
+                    <MapPin className="h-3.5 w-3.5" /> {address}
+                  </span>
+                )
               )}
             </div>
           </div>

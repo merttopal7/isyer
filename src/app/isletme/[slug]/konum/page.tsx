@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getBusinessBySlug } from "@/lib/get-business";
-import { MapPin, ExternalLink } from "lucide-react";
+import { MapPin } from "lucide-react";
 
 const ALLOWED_MAP_ORIGIN = "https://www.google.com/maps/embed";
 
@@ -21,30 +21,14 @@ export default async function KonumPage({ params }: { params: Promise<{ slug: st
     );
   }
 
-  // Embed URL'inden /embed kaldırarak aynı konumu Google Maps'te aç
-  const mapsUrl = mapSrc.replace("https://www.google.com/maps/embed", "https://www.google.com/maps");
-
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
-        {business.address ? (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <MapPin className="h-4 w-4 shrink-0" />
-            <span>{business.address}</span>
-          </div>
-        ) : (
-          <div />
-        )}
-        <a
-          href={mapsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-opacity hover:opacity-90"
-        >
-          <ExternalLink className="h-4 w-4" />
-          Haritada Aç
-        </a>
-      </div>
+      {business.address && (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <MapPin className="h-4 w-4 shrink-0" />
+          <span>{business.address}</span>
+        </div>
+      )}
       <div className="overflow-hidden rounded-xl border shadow-sm">
         <iframe
           src={mapSrc}
