@@ -202,7 +202,7 @@ export function HesabimClient({ customer, application: initApp, business }: Prop
 
             <div className="space-y-1.5">
               <Label htmlFor="cat">Kategori <span className="text-destructive">*</span></Label>
-              <Select value={category} onValueChange={setCategory} required>
+              <Select value={category} onValueChange={(v) => setCategory(v ?? "")} required>
                 <SelectTrigger id="cat">
                   <SelectValue placeholder="Kategori seçin" />
                 </SelectTrigger>
