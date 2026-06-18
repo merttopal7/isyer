@@ -18,11 +18,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: business.meta_title || business.name,
     description: business.meta_description || business.description || undefined,
     keywords: business.meta_keywords || undefined,
+    icons: business.favicon_url ? { icon: business.favicon_url } : undefined,
     openGraph: {
       title: business.meta_title || business.name,
       description: business.meta_description || business.description || undefined,
       url: bizUrl(slug, "/"),
       type: "website",
+      images: business.logo_url ? [{ url: business.logo_url }] : undefined,
     },
   };
 }
@@ -42,6 +44,7 @@ export default async function IsletmeLayout({ children, params }: Props) {
         description={business.description ?? null}
         phone={business.phone ?? null}
         address={business.address ?? null}
+        logoUrl={business.logo_url ?? null}
       />
 
       {/* Page content */}

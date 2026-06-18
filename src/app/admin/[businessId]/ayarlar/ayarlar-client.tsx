@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Save, MapPin, ExternalLink, Search } from "lucide-react";
+import { Loader2, Save, MapPin, ExternalLink, Search, Upload, X, ImageIcon } from "lucide-react";
 import type { Business } from "@/types";
 
 function extractIframeSrc(raw: string): string | null {
@@ -45,9 +45,43 @@ export function AyarlarClient({ business }: Props) {
   const [metaTitle, setMetaTitle] = useState(business.meta_title ?? "");
   const [metaDescription, setMetaDescription] = useState(business.meta_description ?? "");
   const [metaKeywords, setMetaKeywords] = useState(business.meta_keywords ?? "");
+  const [logoUrl, setLogoUrl] = useState<string | null>(business.logo_url ?? null);
+  const [faviconUrl, setFaviconUrl] = useState<string | null>(business.favicon_url ?? null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingFavicon, setUploadingFavicon] = useState(false);
   const [savingGeneral, setSavingGeneral] = useState(false);
   const [savingContact, setSavingContact] = useState(false);
   const [savingSeo, setSavingSeo] = useState(false);
+
+  async function uploadImage(type: "logo" | "favicon", file: File) {
+    const setLoading = type === "logo" ? setUploadingLogo : setUploadingFavicon;
+    const setUrl = type === "logo" ? setLogoUrl : setFaviconUrl;
+    setLoading(true);
+    try {
+      const fd = new FormData();
+      fd.append("type", type);
+      fd.append("file", file);
+      const res = await fetch(`/api/admin/${business.id}/upload`, { method: "POST", body: fd });
+      const data = await res.json();
+      if (!res.ok) { toast.error(data.error ?? "Yüklenemedi."); return; }
+      setUrl(data.url);
+      toast.success(type === "logo" ? "Logo yüklendi." : "Favicon yüklendi.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function deleteImage(type: "logo" | "favicon") {
+    const setUrl = type === "logo" ? setLogoUrl : setFaviconUrl;
+    const res = await fetch(`/api/admin/${business.id}/upload`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type }),
+    });
+    if (!res.ok) { toast.error("Silinemedi."); return; }
+    setUrl(null);
+    toast.success(type === "logo" ? "Logo silindi." : "Favicon silindi.");
+  }
 
   function handleNameChange(value: string) {
     setName(value);
@@ -131,6 +165,7 @@ export function AyarlarClient({ business }: Props) {
         <Tabs defaultValue="genel">
           <TabsList className="mb-6">
             <TabsTrigger value="genel">Genel</TabsTrigger>
+            <TabsTrigger value="gorseller">Görseller</TabsTrigger>
             <TabsTrigger value="iletisim">İletişim</TabsTrigger>
             <TabsTrigger value="konum">Konum</TabsTrigger>
             <TabsTrigger value="seo">SEO</TabsTrigger>
@@ -333,6 +368,120 @@ export function AyarlarClient({ business }: Props) {
               </Button>
             </div>
           </TabsContent>
+          <TabsContent value="gorseller" className="space-y-6">
+            <p className="text-sm text-muted-foreground">
+              Görseller WebP formatına dönüştürülerek optimize edilir. Maksimum dosya boyutu: 5 MB.
+            </p>
+
+            {/* Logo */}
+            <div className="space-y-3">
+              <div>
+                <Label className="text-sm font-semibold">Logo</Label>
+                <p className="text-xs text-muted-foreground mt-0.5">İşletme sayfasında görüntülenir. Önerilen: kare format. Maksimum 400×400 px olarak yeniden boyutlandırılır.</p>
+              </div>
+              {logoUrl ? (
+                <div className="flex items-center gap-3">
+                  <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border bg-muted">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={logoUrl} alt="Logo" className="h-full w-full object-contain" />
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-xs text-muted-foreground">Logo yüklü</p>
+                    <div className="flex gap-2">
+                      <label className="cursor-pointer">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="sr-only"
+                          onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadImage("logo", f); e.target.value = ""; }}
+                        />
+                        <span className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium hover:bg-muted transition-colors">
+                          {uploadingLogo ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+                          Değiştir
+                        </span>
+                      </label>
+                      <button
+                        onClick={() => deleteImage("logo")}
+                        className="inline-flex items-center gap-1.5 rounded-md border border-destructive/30 px-3 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/10 transition-colors"
+                      >
+                        <X className="h-3.5 w-3.5" /> Kaldır
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <label className="cursor-pointer">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="sr-only"
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadImage("logo", f); e.target.value = ""; }}
+                  />
+                  <div className="flex h-24 w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-muted-foreground/25 hover:border-primary/40 hover:bg-muted/30 transition-colors">
+                    {uploadingLogo
+                      ? <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                      : <><ImageIcon className="h-5 w-5 text-muted-foreground" /><span className="text-sm text-muted-foreground">Logo yükle</span></>
+                    }
+                  </div>
+                </label>
+              )}
+            </div>
+
+            {/* Favicon */}
+            <div className="space-y-3">
+              <div>
+                <Label className="text-sm font-semibold">Favicon</Label>
+                <p className="text-xs text-muted-foreground mt-0.5">Tarayıcı sekmesinde görüntülenir. 64×64 px olarak kırpılır.</p>
+              </div>
+              {faviconUrl ? (
+                <div className="flex items-center gap-3">
+                  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border bg-muted">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={faviconUrl} alt="Favicon" className="h-full w-full object-contain" />
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-xs text-muted-foreground">Favicon yüklü</p>
+                    <div className="flex gap-2">
+                      <label className="cursor-pointer">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="sr-only"
+                          onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadImage("favicon", f); e.target.value = ""; }}
+                        />
+                        <span className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium hover:bg-muted transition-colors">
+                          {uploadingFavicon ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+                          Değiştir
+                        </span>
+                      </label>
+                      <button
+                        onClick={() => deleteImage("favicon")}
+                        className="inline-flex items-center gap-1.5 rounded-md border border-destructive/30 px-3 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/10 transition-colors"
+                      >
+                        <X className="h-3.5 w-3.5" /> Kaldır
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <label className="cursor-pointer">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="sr-only"
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadImage("favicon", f); e.target.value = ""; }}
+                  />
+                  <div className="flex h-20 w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-muted-foreground/25 hover:border-primary/40 hover:bg-muted/30 transition-colors">
+                    {uploadingFavicon
+                      ? <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                      : <><ImageIcon className="h-5 w-5 text-muted-foreground" /><span className="text-sm text-muted-foreground">Favicon yükle</span></>
+                    }
+                  </div>
+                </label>
+              )}
+            </div>
+          </TabsContent>
+
           <TabsContent value="seo" className="space-y-4">
             <div className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground space-y-0.5">
               <p className="font-medium text-foreground flex items-center gap-1.5">

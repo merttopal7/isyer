@@ -25,6 +25,8 @@ export interface Business {
   meta_title: string | null;
   meta_description: string | null;
   meta_keywords: string | null;
+  logo_url: string | null;
+  favicon_url: string | null;
   status: BusinessStatus;
   created_at: string;
 }
