@@ -21,6 +21,8 @@ import {
 import type { AppointmentStatus, Service, StaffOrResource, TimeSlot } from "@/types";
 import { bizUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
+import { validatePhone } from "@/lib/slots";
+import { PhoneInput } from "@/components/shared/phone-input";
 
 export type EnrichedAppointment = {
   id: number;
@@ -440,6 +442,7 @@ export function RandevularClient({
   const [createOpen, setCreateOpen] = useState(false);
   const [createStep, setCreateStep] = useState(1);
   const [cPhone, setCPhone] = useState("");
+  const [cPhoneTouched, setCPhoneTouched] = useState(false);
   const [cName, setCName] = useState("");
   const [cServiceId, setCServiceId] = useState<number | "">("");
   const [cStaffId, setCStaffId] = useState<number | "">("");
@@ -452,7 +455,7 @@ export function RandevularClient({
 
   function resetCreate() {
     setCreateStep(1);
-    setCPhone(""); setCName(""); setCServiceId(""); setCStaffId("");
+    setCPhone(""); setCPhoneTouched(false); setCName(""); setCServiceId(""); setCStaffId("");
     setCDate(""); setCSlots([]); setCTime(""); setCResult(null);
   }
 
@@ -1449,12 +1452,23 @@ export function RandevularClient({
             <div className="space-y-3 py-2">
               <div className="space-y-1.5">
                 <Label>Telefon Numarası *</Label>
-                <Input
-                  placeholder="05XXXXXXXXX"
+                <PhoneInput
                   value={cPhone}
-                  onChange={(e) => setCPhone(e.target.value)}
-                  type="tel"
+                  onValueChange={(raw) => { setCPhone(raw); setCPhoneTouched(true); }}
+                  onBlur={() => setCPhoneTouched(true)}
+                  autoComplete="tel"
+                  className={cn(
+                    cPhoneTouched && cPhone.length > 0 && !validatePhone(cPhone) && "border-destructive focus-visible:ring-destructive/20",
+                    validatePhone(cPhone) && "border-green-500 focus-visible:ring-green-500/20"
+                  )}
                 />
+                {cPhoneTouched && cPhone.length > 0 && !validatePhone(cPhone) ? (
+                  <p className="text-xs text-destructive">Format: 0 (5XX) XXX XXXX</p>
+                ) : validatePhone(cPhone) ? (
+                  <p className="flex items-center gap-1 text-xs text-green-600">
+                    <CheckCircle2 className="h-3 w-3" /> Geçerli
+                  </p>
+                ) : null}
               </div>
               <div className="space-y-1.5">
                 <Label>Ad Soyad *</Label>
@@ -1619,7 +1633,7 @@ export function RandevularClient({
                 {createStep < 3 && (
                   <Button
                     disabled={
-                      (createStep === 1 && (!cPhone.trim() || !cName.trim())) ||
+                      (createStep === 1 && (!validatePhone(cPhone) || !cName.trim())) ||
                       (createStep === 2 && !cServiceId)
                     }
                     onClick={() => setCreateStep((s) => s + 1)}
