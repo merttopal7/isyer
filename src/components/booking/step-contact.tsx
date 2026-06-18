@@ -1,14 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Loader2, CalendarCheck, CheckCircle2, Lock } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { validatePhone } from "@/lib/slots";
-import { PhoneInput } from "@/components/shared/phone-input";
+import { ArrowLeft, Loader2, CalendarCheck, User, Phone } from "lucide-react";
 import type { BookingState } from "./booking-flow";
 import type { CustomerJwtPayload } from "@/types";
 
@@ -21,11 +14,8 @@ interface Props {
   submitting: boolean;
 }
 
-export function StepContact({ booking, customer, onChange, onSubmit, onBack, submitting }: Props) {
+export function StepContact({ booking, customer, onSubmit, onBack, submitting }: Props) {
   const { service, staff, date, time, customerName, customerPhone } = booking;
-  const [phoneTouched, setPhoneTouched] = useState(false);
-  // Phone is readonly only when customer has a registered phone number
-  const phoneReadonly = !!(customer?.phone);
 
   function formatDateDisplay(d: string) {
     if (!d) return "";
@@ -35,114 +25,66 @@ export function StepContact({ booking, customer, onChange, onSubmit, onBack, sub
     });
   }
 
-  const phoneValid = validatePhone(customerPhone);
-  const nameValid  = customerName.trim().length >= 2;
-  const canSubmit  = nameValid && phoneValid;
-
-  const showPhoneError = phoneTouched && customerPhone.length > 0 && !phoneValid;
-
   return (
     <div>
-      <h2 className="mb-1 text-xl font-bold">İletişim Bilgileri</h2>
-      <p className="mb-6 text-sm text-muted-foreground">Ad ve telefon numaranızı girin.</p>
+      <h2 className="mb-1 text-xl font-bold">Randevu Onayı</h2>
+      <p className="mb-6 text-sm text-muted-foreground">Lütfen randevu bilgilerinizi kontrol edip onaylayın.</p>
 
       {/* Summary */}
-      <div className="mb-6 rounded-xl border bg-muted/30 p-4 text-sm">
-        <p className="font-medium mb-2">Randevu Özeti</p>
-        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-muted-foreground">
-          <span>Hizmet</span>
-          <span className="text-foreground font-medium">{service?.name}</span>
+      <div className="mb-6 rounded-xl border bg-card/60 p-5 shadow-sm backdrop-blur-sm">
+        <p className="font-semibold text-foreground mb-4 text-sm uppercase tracking-wider flex items-center gap-2">
+          <CalendarCheck className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+          Randevu Detayları
+        </p>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+          <span className="text-muted-foreground">Hizmet</span>
+          <span className="text-foreground font-semibold text-right sm:text-left">{service?.name}</span>
           {staff && (
             <>
-              <span>Personel</span>
-              <span className="text-foreground font-medium">{staff.name}</span>
+              <span className="text-muted-foreground">Personel</span>
+              <span className="text-foreground font-semibold text-right sm:text-left">{staff.name}</span>
             </>
           )}
-          <span>Tarih</span>
-          <span className="text-foreground font-medium">{formatDateDisplay(date)}</span>
-          <span>Saat</span>
-          <span className="text-foreground font-medium">{time}</span>
+          <span className="text-muted-foreground">Tarih</span>
+          <span className="text-foreground font-semibold text-right sm:text-left">{formatDateDisplay(date)}</span>
+          <span className="text-muted-foreground">Saat</span>
+          <span className="text-foreground font-semibold text-right sm:text-left">{time}</span>
           {service?.price && (
             <>
-              <span>Ücret</span>
-              <span className="text-foreground font-medium">{service.price} ₺</span>
+              <span className="text-muted-foreground">Ücret</span>
+              <span className="text-foreground font-extrabold text-indigo-600 dark:text-indigo-400 text-right sm:text-left">{service.price} ₺</span>
             </>
           )}
         </div>
       </div>
 
-      <Separator className="mb-6" />
-
-      <div className="space-y-4">
-        <div className="space-y-1.5">
-          <Label htmlFor="name">Ad Soyad *</Label>
-          <Input
-            id="name"
-            placeholder="Ahmet Yılmaz"
-            value={customerName}
-            onChange={(e) => onChange("customerName", e.target.value)}
-            autoComplete="name"
-            className={cn(nameValid && customerName.length > 0 && "border-green-500 focus-visible:ring-green-500/20")}
-          />
-          {nameValid && customerName.length > 0 && (
-            <p className="flex items-center gap-1 text-xs text-green-600">
-              <CheckCircle2 className="h-3 w-3" /> Geçerli
-            </p>
-          )}
-        </div>
-
-        <div className="space-y-1.5">
-          <Label htmlFor="phone">Telefon Numarası *</Label>
-          <div className="relative">
-            <PhoneInput
-              id="phone"
-              value={customerPhone}
-              onValueChange={(raw) => {
-                if (!phoneReadonly) {
-                  onChange("customerPhone", raw);
-                  setPhoneTouched(true);
-                }
-              }}
-              onBlur={() => !phoneReadonly && setPhoneTouched(true)}
-              readOnly={phoneReadonly}
-              autoComplete="tel"
-              className={cn(
-                phoneReadonly && "cursor-not-allowed bg-muted pr-9 text-muted-foreground",
-                !phoneReadonly && showPhoneError && "border-destructive focus-visible:ring-destructive/20",
-                !phoneReadonly && phoneValid && customerPhone.length > 0 && "border-green-500 focus-visible:ring-green-500/20"
-              )}
-            />
-            {phoneReadonly && (
-              <Lock className="absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-            )}
-          </div>
-          {phoneReadonly ? (
-            <p className="flex items-center gap-1 text-xs text-muted-foreground">
-              <CheckCircle2 className="h-3 w-3 text-green-600" /> Hesabınıza kayıtlı numara
-            </p>
-          ) : showPhoneError ? (
-            <p className="text-xs text-destructive">Format: 0 (5XX) XXX XXXX</p>
-          ) : phoneValid && customerPhone.length > 0 ? (
-            <p className="flex items-center gap-1 text-xs text-green-600">
-              <CheckCircle2 className="h-3 w-3" /> Geçerli
-            </p>
-          ) : (
-            <p className="text-xs text-muted-foreground">
-              Randevu durumunuzu bu numarayla sorgulayabilirsiniz.
-            </p>
-          )}
+      {/* Customer Info (Read-only) */}
+      <div className="mb-6 rounded-xl border bg-indigo-500/5 border-indigo-500/10 p-5 shadow-sm">
+        <p className="font-semibold text-indigo-600 dark:text-indigo-400 mb-4 text-sm uppercase tracking-wider flex items-center gap-2">
+          <User className="h-5 w-5" />
+          Kişisel Bilgileriniz
+        </p>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+          <span className="text-muted-foreground flex items-center gap-1.5"><User className="h-4 w-4 text-muted-foreground/60" /> Ad Soyad</span>
+          <span className="text-foreground font-semibold text-right sm:text-left">{customerName}</span>
+          <span className="text-muted-foreground flex items-center gap-1.5"><Phone className="h-4 w-4 text-muted-foreground/60" /> Telefon</span>
+          <span className="text-foreground font-semibold text-right sm:text-left">{customerPhone}</span>
         </div>
       </div>
 
-      <div className="mt-6 flex justify-between">
-        <Button variant="outline" onClick={onBack}>
+      <div className="mt-8 flex justify-between gap-4">
+        <Button variant="outline" className="rounded-xl h-11 px-5" onClick={onBack} disabled={submitting}>
           <ArrowLeft className="mr-2 h-4 w-4" /> Geri
         </Button>
-        <Button onClick={onSubmit} disabled={!canSubmit || submitting}>
+        <Button 
+          onClick={onSubmit} 
+          className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl h-11 px-6 shadow-md shadow-indigo-600/10"
+          disabled={submitting}
+        >
           {submitting
             ? <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             : <CalendarCheck className="mr-2 h-4 w-4" />}
-          Randevu Oluştur
+          Randevuyu Onayla ve Oluştur
         </Button>
       </div>
     </div>

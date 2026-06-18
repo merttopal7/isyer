@@ -39,7 +39,7 @@ const STEP_LABELS: Record<Exclude<BookingStep, "auth" | "done">, string> = {
   service: "Hizmet",
   staff: "Personel",
   datetime: "Tarih & Saat",
-  contact: "İletişim",
+  contact: "Onay",
 };
 
 export function BookingFlow({ business, services, staff, initialCustomer }: Props) {
