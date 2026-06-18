@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import db from "@/lib/db";
 import { getCustomerSession } from "@/lib/customer-auth";
-import type { Appointment } from "@/types";
+import type { Appointment, Customer } from "@/types";
 
 export async function POST(
   _req: NextRequest,
@@ -21,9 +21,13 @@ export async function POST(
     return NextResponse.json({ error: "Bu randevu başka bir hesaba bağlı." }, { status: 409 });
   }
 
+  const customer = await db<Customer>("customers").where({ id: session.customerId }).first();
   await db<Appointment>("appointments")
     .where({ id: Number(id) })
-    .update({ customer_id: session.customerId });
+    .update({
+      customer_id: session.customerId,
+      customer_name: customer?.name ?? appointment.customer_name,
+    });
 
   const updated = await db<Appointment>("appointments").where({ id: Number(id) }).first();
   return NextResponse.json(updated);

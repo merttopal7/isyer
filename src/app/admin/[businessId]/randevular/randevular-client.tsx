@@ -160,12 +160,13 @@ function waLink(appt: EnrichedAppointment, businessSlug: string): string {
   const phone = toWaPhone(appt.customer_phone);
   const date = formatDateDisplay(appt.appointment_date);
   const apptUrl = `\nRandevu detaylarınız: ${bizUrl(businessSlug, `/randevu/${appt.booking_code}`, typeof window !== "undefined" ? window.location.origin : "")}`;
+  const greeting = appt.customer_id !== null ? `Merhaba ${appt.customer_name}, ` : "";
   const texts: Record<AppointmentStatus, string> = {
-    pending:          `Merhaba ${appt.customer_name}, ${appt.service_name} randevunuz (${date} ${appt.start_time}) alındı ve onay bekleniyor. Randevu kodunuz: ${appt.booking_code}${apptUrl}`,
-    approved:         `Merhaba ${appt.customer_name}, ${appt.service_name} randevunuz ${date} ${appt.start_time} için onaylanmıştır. Randevu kodunuz: ${appt.booking_code}${apptUrl}`,
-    rejected:         `Merhaba ${appt.customer_name}, ${appt.service_name} randevunuz maalesef uygun değildir.${appt.reject_reason ? ` Sebep: ${appt.reject_reason}` : ""}`,
-    cancelled:        `Merhaba ${appt.customer_name}, ${appt.service_name} randevunuz (${date} ${appt.start_time}) iptal edilmiştir.`,
-    cancel_requested: `Merhaba ${appt.customer_name}, iptal talebiniz alınmıştır. En kısa sürede sizinle iletişime geçeceğiz.`,
+    pending:          `${greeting}${appt.service_name} randevunuz (${date} ${appt.start_time}) alındı ve onay bekleniyor. Randevu kodunuz: ${appt.booking_code}${apptUrl}`,
+    approved:         `${greeting}${appt.service_name} randevunuz ${date} ${appt.start_time} için onaylanmıştır. Randevu kodunuz: ${appt.booking_code}${apptUrl}`,
+    rejected:         `${greeting}${appt.service_name} randevunuz maalesef uygun değildir.${appt.reject_reason ? ` Sebep: ${appt.reject_reason}` : ""}`,
+    cancelled:        `${greeting}${appt.service_name} randevunuz (${date} ${appt.start_time}) iptal edilmiştir.`,
+    cancel_requested: `${greeting}iptal talebiniz alınmıştır. En kısa sürede sizinle iletişime geçeceğiz.`,
   };
   return `https://wa.me/${phone}?text=${encodeURIComponent(texts[appt.status])}`;
 }
