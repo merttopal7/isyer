@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import db from "@/lib/db";
+import { bizUrl } from "@/lib/url";
 import { Navbar } from "@/components/shared/navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -111,7 +112,7 @@ export default async function HomePage() {
                       </CardHeader>
                       <CardContent>
                         <Button className="w-full" asChild>
-                          <Link href={`/isletme/${biz.slug}`}>
+                          <Link href={bizUrl(biz.slug, "/")}>
                             Randevu Al <ArrowRight className="ml-2 h-4 w-4" />
                           </Link>
                         </Button>
