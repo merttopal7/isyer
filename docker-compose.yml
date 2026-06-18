@@ -15,7 +15,9 @@ services:
       retries: 10
 
   migrate:
-    build: .
+    build:
+      context: .
+      target: migrator
     command: npx knex --knexfile knexfile.ts migrate:latest
     environment:
       DB_CLIENT: pg

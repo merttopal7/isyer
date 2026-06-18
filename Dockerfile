@@ -12,14 +12,24 @@ FROM node:20-slim AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN npm run build
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN NODE_OPTIONS="--max-old-space-size=2048" npm run build
 
-# ── Stage 3: Runner ───────────────────────────────────────────────
+# ── Stage 3: Migrator (knexfile.ts + ts-node gerektirir) ──────────
+FROM node:20-slim AS migrator
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY knexfile.ts ./
+COPY migrations ./migrations
+COPY seeds ./seeds
+
+# ── Stage 4: Runner ───────────────────────────────────────────────
 FROM node:20-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production \
     PORT=3000 \
-    HOSTNAME=0.0.0.0
+    HOSTNAME=0.0.0.0 \
+    NEXT_TELEMETRY_DISABLED=1
 
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
