@@ -18,7 +18,7 @@ export function BusinessHeader({ name, category, description, phone, address, lo
         <div className="flex items-start gap-4">
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-primary/10 overflow-hidden">
             {logoUrl ? (
-              <Image src={logoUrl} alt={name} width={56} height={56} className="h-full w-full object-cover" />
+              <Image src={logoUrl} alt={name} width={56} height={56} className="h-full w-full object-cover" unoptimized />
             ) : (
               <Building2 className="h-7 w-7 text-primary" />
             )}
