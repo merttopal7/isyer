@@ -22,8 +22,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Telefon numarası veya şifre hatalı." }, { status: 401 });
   }
 
-  const token = signCustomerToken({ customerId: customer.id, phone: customer.phone, name: customer.name });
-  const res = NextResponse.json({ customerId: customer.id, phone: customer.phone, name: customer.name });
+  const payload = {
+    customerId: customer.id,
+    phone: customer.phone,
+    name: customer.name,
+    businessId: customer.business_id ?? null,
+  };
+  const token = signCustomerToken(payload);
+  const res = NextResponse.json(payload);
   res.cookies.set(setCustomerCookieOptions(token));
   return res;
 }

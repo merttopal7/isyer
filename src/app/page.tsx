@@ -381,7 +381,10 @@ export default async function HomePage() {
               İşletmeler için ücretsiz dijital vitrin ve online randevu platformu
             </p>
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} İşyer
+              © &nbsp;{new Date().getFullYear()} &nbsp;İşyer &nbsp;
+              <Link href="https://merttopal.com.tr" target="_blank" rel="noopener noreferrer" className="hover:text-primary">
+                merttopal.com.tr
+              </Link>            
             </p>
           </div>
         </div>

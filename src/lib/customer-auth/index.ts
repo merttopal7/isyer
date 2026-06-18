@@ -1,15 +1,12 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
+import type { CustomerJwtPayload } from "@/types";
+
+export type { CustomerJwtPayload };
 
 const JWT_SECRET = process.env.JWT_SECRET ?? "dev-secret-change-in-prod";
 export const CUSTOMER_COOKIE_NAME = "customer_token";
-
-export interface CustomerJwtPayload {
-  customerId: number;
-  phone: string | null;
-  name: string;
-}
 
 export async function hashCustomerPassword(password: string) {
   return bcrypt.hash(password, 10);
@@ -43,7 +40,6 @@ function cookieDomain(): string | undefined {
     process.env.NEXT_PUBLIC_PRODUCTION === "true" &&
     process.env.NEXT_PUBLIC_BASE_DOMAIN
   ) {
-    // Wildcard: hem www.isyer.com hem de *.isyer.com okuyabilsin
     return `.${process.env.NEXT_PUBLIC_BASE_DOMAIN}`;
   }
   return undefined;

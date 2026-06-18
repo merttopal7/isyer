@@ -81,6 +81,8 @@ export interface Appointment {
   created_at: string;
 }
 
+export type ApplicationStatus = "pending" | "approved" | "rejected";
+
 export interface Customer {
   id: number;
   phone: string | null;
@@ -88,6 +90,22 @@ export interface Customer {
   password_hash: string | null;
   google_id: string | null;
   email: string | null;
+  business_id: number | null;
+  created_at: string;
+}
+
+export interface BusinessApplication {
+  id: number;
+  customer_id: number;
+  customer_name?: string;
+  business_name: string;
+  category: string;
+  phone: string | null;
+  address: string | null;
+  description: string | null;
+  status: ApplicationStatus;
+  reject_reason: string | null;
+  business_id: number | null;
   created_at: string;
 }
 
@@ -119,4 +137,5 @@ export interface CustomerJwtPayload {
   customerId: number;
   phone: string | null;
   name: string;
+  businessId?: number | null;
 }

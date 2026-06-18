@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { ThemeToggle } from "./theme-toggle";
 import { Button } from "@/components/ui/button";
-import { Calendar, Building2, User, LogOut, ChevronDown } from "lucide-react";
+import { User, LogOut, ChevronDown, LayoutDashboard, Calendar } from "lucide-react";
 import type { CustomerJwtPayload } from "@/types";
 
 export function Navbar() {
@@ -26,12 +27,13 @@ export function Navbar() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2 font-semibold">
-          <Calendar className="h-5 w-5 text-primary" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.svg" alt="İşyer" className="h-6 w-6" />
           <span>İşyer</span>
         </Link>
 
         <nav className="flex items-center gap-1">
-          <Button variant="ghost" size="sm" asChild>
+          <Button variant="ghost" size="sm" className="hidden sm:flex" asChild>
             <Link href="/randevu-sorgula">Randevu Sorgula</Link>
           </Button>
 
@@ -46,12 +48,6 @@ export function Navbar() {
             </Button>
           )}
 
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/admin/login">
-              <Building2 className="mr-1 h-4 w-4" />
-              <span className="hidden sm:inline">Admin</span>
-            </Link>
-          </Button>
           <ThemeToggle />
         </nav>
       </div>
@@ -60,7 +56,20 @@ export function Navbar() {
 }
 
 function CustomerMenu({ customer, onLogout }: { customer: CustomerJwtPayload; onLogout: () => void }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [switching, setSwitching] = useState(false);
+
+  async function handleSwitchToAdmin() {
+    setSwitching(true);
+    try {
+      const res = await fetch("/api/customer/switch-to-admin", { method: "POST" });
+      const data = await res.json();
+      if (res.ok) router.push(`/admin/${data.businessId}`);
+    } finally {
+      setSwitching(false);
+    }
+  }
 
   return (
     <div className="relative">
@@ -71,19 +80,26 @@ function CustomerMenu({ customer, onLogout }: { customer: CustomerJwtPayload; on
         className="gap-1"
       >
         <User className="h-4 w-4" />
-        <span className="max-w-[100px] truncate text-sm">{customer.name}</span>
+        <span className="hidden max-w-[100px] truncate text-sm sm:inline">{customer.name}</span>
         <ChevronDown className="h-3.5 w-3.5 opacity-60" />
       </Button>
 
       {open && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 z-20 mt-1 w-48 rounded-lg border bg-popover p-1 shadow-md">
+          <div className="absolute right-0 z-20 mt-1 w-52 rounded-lg border bg-popover p-1 shadow-md">
             <div className="px-3 py-2">
               <p className="text-xs font-medium">{customer.name}</p>
               <p className="text-xs text-muted-foreground">{customer.phone}</p>
             </div>
             <div className="my-1 h-px bg-border" />
+            <Link
+              href="/hesabim"
+              onClick={() => setOpen(false)}
+              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent"
+            >
+              <User className="h-4 w-4" /> Hesabım
+            </Link>
             <Link
               href="/randevularim"
               onClick={() => setOpen(false)}
@@ -91,6 +107,16 @@ function CustomerMenu({ customer, onLogout }: { customer: CustomerJwtPayload; on
             >
               <Calendar className="h-4 w-4" /> Randevularım
             </Link>
+            {customer.businessId && (
+              <button
+                onClick={() => { setOpen(false); handleSwitchToAdmin(); }}
+                disabled={switching}
+                className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent text-primary"
+              >
+                <LayoutDashboard className="h-4 w-4" /> Admin Panelim
+              </button>
+            )}
+            <div className="my-1 h-px bg-border" />
             <button
               onClick={() => { setOpen(false); onLogout(); }}
               className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-destructive hover:bg-destructive/10"

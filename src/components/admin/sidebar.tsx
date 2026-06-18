@@ -9,6 +9,7 @@ import { ThemeToggle } from "@/components/shared/theme-toggle";
 import {
   Calendar, Building2, Scissors, Users, Clock, LayoutDashboard, LogOut,
   ChevronRight, ChevronDown, Megaphone, Settings, ChevronsLeft, ChevronsRight,
+  ClipboardList,
 } from "lucide-react";
 import type { JwtPayload } from "@/types";
 import { toast } from "sonner";
@@ -66,7 +67,10 @@ export function AdminSidebar({ session, businessName, onNavigate }: SidebarProps
   }
 
   const links: NavItem[] = isPlatformAdmin
-    ? [{ href: "/admin/isletmeler", label: "İşletmeler", icon: Building2 }]
+    ? [
+        { href: "/admin/isletmeler", label: "İşletmeler",  icon: Building2     },
+        { href: "/admin/basvurular", label: "Başvurular",  icon: ClipboardList },
+      ]
     : bId
     ? [
         { href: `/admin/${bId}/randevular`, label: "Randevular", icon: Calendar },

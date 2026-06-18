@@ -33,8 +33,9 @@ export async function POST(req: NextRequest) {
     .insert({ phone, name: trimmedName, password_hash })
     .returning("id");
 
-  const token = signCustomerToken({ customerId: id, phone, name: trimmedName });
-  const res = NextResponse.json({ customerId: id, phone, name: trimmedName });
+  const payload = { customerId: id, phone, name: trimmedName, businessId: null };
+  const token = signCustomerToken(payload);
+  const res = NextResponse.json(payload);
   res.cookies.set(setCustomerCookieOptions(token));
   return res;
 }

@@ -8,7 +8,7 @@ import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
   Calendar, CalendarPlus, Megaphone, MapPin,
-  User, LogOut, ChevronDown, Building2,
+  User, LogOut, ChevronDown, Building2, LayoutDashboard, Loader2,
 } from "lucide-react";
 import type { CustomerJwtPayload } from "@/types";
 import { bizPath } from "@/lib/url";
@@ -102,7 +102,7 @@ export function BusinessNavbar({ slug, businessName, hasMap, logoUrl }: Props) {
                   key={href}
                   href={href}
                   className={cn(
-                    "flex shrink-0 items-center gap-1.5 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors sm:px-4",
+                    "flex shrink-0 items-center gap-1 border-b-2 px-2.5 py-2.5 text-xs font-medium transition-colors sm:gap-1.5 sm:px-4 sm:text-sm",
                     active
                       ? "border-primary text-primary"
                       : "border-transparent text-muted-foreground hover:border-border hover:text-foreground"
@@ -122,6 +122,18 @@ export function BusinessNavbar({ slug, businessName, hasMap, logoUrl }: Props) {
 
 function CustomerMenu({ customer, onLogout, slug }: { customer: CustomerJwtPayload; onLogout: () => void; slug: string }) {
   const [open, setOpen] = useState(false);
+  const [switching, setSwitching] = useState(false);
+
+  async function handleSwitchToAdmin() {
+    setSwitching(true);
+    try {
+      const res = await fetch("/api/customer/switch-to-admin", { method: "POST" });
+      const data = await res.json();
+      if (res.ok) window.location.href = `/admin/${data.businessId}`;
+    } finally {
+      setSwitching(false);
+    }
+  }
 
   return (
     <div className="relative">
@@ -134,12 +146,19 @@ function CustomerMenu({ customer, onLogout, slug }: { customer: CustomerJwtPaylo
       {open && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 z-20 mt-1 w-48 rounded-lg border bg-popover p-1 shadow-md">
+          <div className="absolute right-0 z-20 mt-1 w-52 rounded-lg border bg-popover p-1 shadow-md">
             <div className="px-3 py-2">
               <p className="text-xs font-medium">{customer.name}</p>
               <p className="text-xs text-muted-foreground">{customer.phone}</p>
             </div>
             <div className="my-1 h-px bg-border" />
+            <Link
+              href="/hesabim"
+              onClick={() => setOpen(false)}
+              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent"
+            >
+              <User className="h-4 w-4" /> Hesabım
+            </Link>
             <Link
               href={bizPath(slug, "/randevularim")}
               onClick={() => setOpen(false)}
@@ -147,6 +166,17 @@ function CustomerMenu({ customer, onLogout, slug }: { customer: CustomerJwtPaylo
             >
               <Calendar className="h-4 w-4" /> Randevularım
             </Link>
+            {customer.businessId && (
+              <button
+                onClick={() => { setOpen(false); handleSwitchToAdmin(); }}
+                disabled={switching}
+                className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent text-primary"
+              >
+                {switching ? <Loader2 className="h-4 w-4 animate-spin" /> : <LayoutDashboard className="h-4 w-4" />}
+                Admin Panelim
+              </button>
+            )}
+            <div className="my-1 h-px bg-border" />
             <button
               onClick={() => { setOpen(false); onLogout(); }}
               className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
