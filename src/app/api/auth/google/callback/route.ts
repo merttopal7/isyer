@@ -105,10 +105,19 @@ export async function GET(req: NextRequest) {
     name: customer.name,
   });
 
+  const clearNonce = { name: "oauth_nonce", value: "", maxAge: 0, path: "/" };
+
+  // Telefon numarası yoksa önce telefon toplama sayfasına yönlendir
+  if (!customer.phone) {
+    const phoneRedirect = `${APP_URL}/giris/telefon?redirect=${encodeURIComponent(redirect)}`;
+    const res = NextResponse.redirect(phoneRedirect);
+    res.cookies.set(setCustomerCookieOptions(token));
+    res.cookies.set(clearNonce);
+    return res;
+  }
+
   const res = NextResponse.redirect(`${APP_URL}${redirect}`);
   res.cookies.set(setCustomerCookieOptions(token));
-  // Clear nonce cookie
-  res.cookies.set({ name: "oauth_nonce", value: "", maxAge: 0, path: "/" });
-
+  res.cookies.set(clearNonce);
   return res;
 }
