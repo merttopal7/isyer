@@ -6,7 +6,25 @@ import type { Customer } from "@/types";
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID ?? "";
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET ?? "";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+const BASE_DOMAIN = process.env.NEXT_PUBLIC_BASE_DOMAIN;
+const PROD = process.env.NEXT_PUBLIC_PRODUCTION === "true";
 const REDIRECT_URI = `${APP_URL}/api/auth/google/callback`;
+
+function nonceCookieDomain(): string | undefined {
+  return PROD && BASE_DOMAIN ? `.${BASE_DOMAIN}` : undefined;
+}
+
+/** Hata durumunda redirect edilecek login sayfası URL'i */
+function errorRedirect(errorCode: string, redirectHint?: string): string {
+  // redirect tam subdomain URL'yse (production flow) → o subdomainin /giris'ine yönlendir
+  if (redirectHint?.startsWith("http")) {
+    try {
+      const u = new URL(redirectHint);
+      return `${u.protocol}//${u.host}/giris?error=${errorCode}`;
+    } catch { /* ignore */ }
+  }
+  return `${APP_URL}/?error=${errorCode}`;
+}
 
 interface GoogleProfile {
   id: string;
@@ -22,7 +40,7 @@ export async function GET(req: NextRequest) {
   const error = searchParams.get("error");
 
   if (error || !code || !state) {
-    return NextResponse.redirect(`${APP_URL}/giris?error=google_cancelled`);
+    return NextResponse.redirect(errorRedirect("google_cancelled"));
   }
 
   // Decode state
@@ -33,13 +51,13 @@ export async function GET(req: NextRequest) {
     nonce = decoded.nonce;
     redirect = decoded.redirect ?? "/";
   } catch {
-    return NextResponse.redirect(`${APP_URL}/giris?error=invalid_state`);
+    return NextResponse.redirect(errorRedirect("invalid_state"));
   }
 
   // Verify nonce (CSRF protection)
   const storedNonce = req.cookies.get("oauth_nonce")?.value;
   if (!storedNonce || storedNonce !== nonce) {
-    return NextResponse.redirect(`${APP_URL}/giris?error=invalid_state`);
+    return NextResponse.redirect(errorRedirect("invalid_state", redirect));
   }
 
   // Exchange code for access token
@@ -56,7 +74,7 @@ export async function GET(req: NextRequest) {
   });
 
   if (!tokenRes.ok) {
-    return NextResponse.redirect(`${APP_URL}/giris?error=token_exchange`);
+    return NextResponse.redirect(errorRedirect("token_exchange", redirect));
   }
 
   const tokens = await tokenRes.json();
@@ -67,7 +85,7 @@ export async function GET(req: NextRequest) {
   });
 
   if (!profileRes.ok) {
-    return NextResponse.redirect(`${APP_URL}/giris?error=profile_fetch`);
+    return NextResponse.redirect(errorRedirect("profile_fetch", redirect));
   }
 
   const profile: GoogleProfile = await profileRes.json();
@@ -105,7 +123,15 @@ export async function GET(req: NextRequest) {
     name: customer.name,
   });
 
-  const clearNonce = { name: "oauth_nonce", value: "", maxAge: 0, path: "/" };
+  // Nonce cookie temizle — set edildiği domain ile aynı domain kullanılmalı
+  const nonceDomain = nonceCookieDomain();
+  const clearNonce = {
+    name: "oauth_nonce",
+    value: "",
+    maxAge: 0,
+    path: "/",
+    ...(nonceDomain ? { domain: nonceDomain } : {}),
+  };
 
   // Telefon numarası yoksa önce telefon toplama sayfasına yönlendir
   if (!customer.phone) {
