@@ -3,7 +3,7 @@
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams, useParams } from "next/navigation";
 import Link from "next/link";
-import { bizPath } from "@/lib/url";
+import { bizPath, googleAuthUrl } from "@/lib/url";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,7 +25,7 @@ function LoginForm() {
   const router = useRouter();
   const params = useParams<{ slug: string }>();
   const searchParams = useSearchParams();
-  const base = `/isletme/${params.slug}`;
+  const base = bizPath(params.slug);
   const redirect = searchParams.get("redirect") ?? base;
   const oauthError = searchParams.get("error");
 
@@ -38,7 +38,7 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
 
   function handleGoogleLogin() {
-    window.location.href = `/api/auth/google?redirect=${encodeURIComponent(redirect)}`;
+    window.location.href = googleAuthUrl(params.slug, redirect);
   }
 
   async function handleSubmit(e: React.FormEvent) {

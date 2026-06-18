@@ -116,7 +116,9 @@ export async function GET(req: NextRequest) {
     return res;
   }
 
-  const res = NextResponse.redirect(`${APP_URL}${redirect}`);
+  // redirect tam URL ise (subdomain'den geliyorsa) direkt kullan, yoksa ana domain'e ekle
+  const finalUrl = redirect.startsWith("http") ? redirect : `${APP_URL}${redirect}`;
+  const res = NextResponse.redirect(finalUrl);
   res.cookies.set(setCustomerCookieOptions(token));
   res.cookies.set(clearNonce);
   return res;

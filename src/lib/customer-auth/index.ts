@@ -38,7 +38,19 @@ export async function getCustomerSession(): Promise<CustomerJwtPayload | null> {
   return verifyCustomerToken(token);
 }
 
+function cookieDomain(): string | undefined {
+  if (
+    process.env.NEXT_PUBLIC_PRODUCTION === "true" &&
+    process.env.NEXT_PUBLIC_BASE_DOMAIN
+  ) {
+    // Wildcard: hem www.isyer.com hem de *.isyer.com okuyabilsin
+    return `.${process.env.NEXT_PUBLIC_BASE_DOMAIN}`;
+  }
+  return undefined;
+}
+
 export function setCustomerCookieOptions(token: string) {
+  const domain = cookieDomain();
   return {
     name: CUSTOMER_COOKIE_NAME,
     value: token,
@@ -47,5 +59,20 @@ export function setCustomerCookieOptions(token: string) {
     sameSite: "lax" as const,
     maxAge: 60 * 60 * 24 * 30,
     path: "/",
+    ...(domain ? { domain } : {}),
+  };
+}
+
+export function clearCustomerCookieOptions() {
+  const domain = cookieDomain();
+  return {
+    name: CUSTOMER_COOKIE_NAME,
+    value: "",
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax" as const,
+    maxAge: 0,
+    path: "/",
+    ...(domain ? { domain } : {}),
   };
 }

@@ -25,3 +25,19 @@ export function bizUrl(slug: string, page = "", origin = ""): string {
   if (PROD && DOMAIN) return `https://${slug}.${DOMAIN}${p || "/"}`;
   return `${origin}/isletme/${slug}${p}`;
 }
+
+/**
+ * Google OAuth başlatma URL'i.
+ * PRODUCTION=true  → ana domain (www) üzerinden başlatır; redirect hedefini tam subdomain URL'e çevirir.
+ *                    Böylece nonce cookie ve JWT cookie aynı domain'de kalır.
+ * PRODUCTION=false → göreli /api/auth/google path'i
+ */
+export function googleAuthUrl(slug: string, redirectPath: string): string {
+  if (PROD && DOMAIN) {
+    const fullRedirect = redirectPath.startsWith("http")
+      ? redirectPath
+      : `https://${slug}.${DOMAIN}${redirectPath || "/"}`;
+    return `https://www.${DOMAIN}/api/auth/google?redirect=${encodeURIComponent(fullRedirect)}`;
+  }
+  return `/api/auth/google?redirect=${encodeURIComponent(redirectPath)}`;
+}

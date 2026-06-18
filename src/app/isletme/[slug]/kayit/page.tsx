@@ -3,7 +3,7 @@
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams, useParams } from "next/navigation";
 import Link from "next/link";
-import { bizPath } from "@/lib/url";
+import { bizPath, googleAuthUrl } from "@/lib/url";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -60,7 +60,7 @@ function RegisterForm() {
   }
 
   function handleGoogleLogin() {
-    window.location.href = `/api/auth/google?redirect=${encodeURIComponent(redirect)}`;
+    window.location.href = googleAuthUrl(params.slug, redirect);
   }
 
   return (

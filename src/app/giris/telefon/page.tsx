@@ -41,8 +41,13 @@ function PhoneForm() {
         setError(data.error ?? "Telefon kaydedilemedi.");
         return;
       }
-      router.push(redirect);
-      router.refresh();
+      // redirect tam URL ise (subdomain) full page load gerekir
+      if (redirect.startsWith("http")) {
+        window.location.href = redirect;
+      } else {
+        router.push(redirect);
+        router.refresh();
+      }
     } finally {
       setLoading(false);
     }

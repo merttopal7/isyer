@@ -3,6 +3,8 @@ import { randomBytes } from "crypto";
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID ?? "";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+const BASE_DOMAIN = process.env.NEXT_PUBLIC_BASE_DOMAIN;
+const PROD = process.env.NEXT_PUBLIC_PRODUCTION === "true";
 
 export async function GET(req: NextRequest) {
   if (!GOOGLE_CLIENT_ID) {
@@ -28,6 +30,8 @@ export async function GET(req: NextRequest) {
   const res = NextResponse.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params}`);
 
   // Store nonce in httpOnly cookie to verify in callback (5 min TTL)
+  // domain: wildcard (.isyer.com) — callback her zaman ana domain'de çalışır
+  const nonceDomain = PROD && BASE_DOMAIN ? `.${BASE_DOMAIN}` : undefined;
   res.cookies.set({
     name: "oauth_nonce",
     value: nonce,
@@ -35,6 +39,7 @@ export async function GET(req: NextRequest) {
     sameSite: "lax",
     maxAge: 300,
     path: "/",
+    ...(nonceDomain ? { domain: nonceDomain } : {}),
   });
 
   return res;
