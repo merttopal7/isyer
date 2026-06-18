@@ -40,10 +40,10 @@ export function proxy(request: NextRequest) {
     const m = pathname.match(/^\/isletme\/([^/]+)(\/.*)?$/);
     if (m) {
       const [, slug, rest = "/"] = m;
-      const url = request.nextUrl.clone();
-      url.host = `${slug}.${DOMAIN}`;
-      url.pathname = rest;
-      return NextResponse.redirect(url, 301);
+      // nextUrl.clone() iç portu (3000) taşır — dışarıya görünen protokol/host ile inşa et
+      const proto = request.headers.get("x-forwarded-proto") ?? "https";
+      const search = request.nextUrl.search; // query string'i koru (?redirect=... gibi)
+      return NextResponse.redirect(`${proto}://${slug}.${DOMAIN}${rest}${search}`, 301);
     }
   }
 
