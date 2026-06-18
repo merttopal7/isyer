@@ -27,6 +27,7 @@ export async function POST(
     .update({
       customer_id: session.customerId,
       customer_name: customer?.name ?? appointment.customer_name,
+      customer_phone: customer?.phone ?? appointment.customer_phone,
     });
 
   const updated = await db<Appointment>("appointments").where({ id: Number(id) }).first();
