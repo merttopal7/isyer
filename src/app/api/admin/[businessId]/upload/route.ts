@@ -8,7 +8,7 @@ import fs from "fs/promises";
 const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads", "businesses");
 
 const SPECS = {
-  logo:    { width: 400, height: 400, quality: 85, fit: "inside" as const },
+  logo:    { width: 800, height: 800, quality: 93, fit: "inside" as const },
   favicon: { width: 64,  height: 64,  quality: 90, fit: "cover"  as const },
 } as const;
 
@@ -20,7 +20,7 @@ async function processImage(buffer: Buffer, type: ImageType): Promise<{ data: Bu
     const spec = SPECS[type];
     const data = await sharp(buffer)
       .resize(spec.width, spec.height, { fit: spec.fit, withoutEnlargement: true })
-      .webp({ quality: spec.quality, effort: 6 })
+      .webp({ quality: spec.quality, effort: 4 })
       .toBuffer();
     return { data, ext: "webp" };
   } catch {

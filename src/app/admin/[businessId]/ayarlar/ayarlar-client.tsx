@@ -381,10 +381,16 @@ export function AyarlarClient({ business }: Props) {
               </div>
               {logoUrl ? (
                 <div className="flex items-center gap-3">
-                  <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border bg-muted">
+                  <a
+                    href={logoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Tam görüntüle"
+                    className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border bg-muted block hover:opacity-80 transition-opacity"
+                  >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={logoUrl} alt="Logo" className="h-full w-full object-contain" />
-                  </div>
+                    <img src={logoUrl} alt="Logo" className="h-full w-full object-cover" />
+                  </a>
                   <div className="space-y-2">
                     <p className="text-xs text-muted-foreground">Logo yüklü</p>
                     <div className="flex gap-2">
