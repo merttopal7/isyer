@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
@@ -22,7 +22,6 @@ interface Props {
 
 export function BusinessNavbar({ slug, businessName, hasMap, logoUrl }: Props) {
   const pathname = usePathname();
-  const router = useRouter();
 
   const [customer, setCustomer] = useState<CustomerJwtPayload | null | undefined>(undefined);
 
@@ -47,8 +46,7 @@ export function BusinessNavbar({ slug, businessName, hasMap, logoUrl }: Props) {
 
   async function handleLogout() {
     await fetch("/api/customer/logout", { method: "POST" });
-    setCustomer(null);
-    router.push(bizPath(slug, "/duyurular"));
+    window.location.href = bizPath(slug, "/duyurular");
   }
 
   return (
@@ -131,7 +129,7 @@ function CustomerMenu({ customer, onLogout, slug }: { customer: CustomerJwtPaylo
       const data = await res.json();
       if (res.ok) {
         const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
-        window.location.href = `${appUrl}/admin/${data.businessId}`;
+        window.location.href = `${appUrl}/admin`;
       }
     } finally {
       setSwitching(false);

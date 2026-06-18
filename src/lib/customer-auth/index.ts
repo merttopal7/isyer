@@ -67,8 +67,20 @@ export function clearCustomerCookieOptions() {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax" as const,
-    maxAge: 0,
+    expires: new Date(0),
     path: "/",
     ...(domain ? { domain } : {}),
+  };
+}
+
+export function clearCustomerCookieNoDomain() {
+  return {
+    name: CUSTOMER_COOKIE_NAME,
+    value: "",
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax" as const,
+    expires: new Date(0),
+    path: "/",
   };
 }

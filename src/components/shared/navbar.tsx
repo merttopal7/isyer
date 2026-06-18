@@ -20,7 +20,7 @@ export function Navbar() {
 
   async function handleLogout() {
     await fetch("/api/customer/logout", { method: "POST" });
-    setCustomer(null);
+    window.location.href = "/";
   }
 
   return (
@@ -65,7 +65,7 @@ function CustomerMenu({ customer, onLogout }: { customer: CustomerJwtPayload; on
     try {
       const res = await fetch("/api/customer/switch-to-admin", { method: "POST" });
       const data = await res.json();
-      if (res.ok) router.push(`/admin/${data.businessId}`);
+      if (res.ok) router.push(`/admin`);
     } finally {
       setSwitching(false);
     }

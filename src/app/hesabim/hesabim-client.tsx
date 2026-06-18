@@ -64,7 +64,7 @@ export function HesabimClient({ customer, application: initApp, business }: Prop
       const res = await fetch("/api/customer/switch-to-admin", { method: "POST" });
       const data = await res.json();
       if (!res.ok) { toast.error(data.error ?? "Hata oluştu."); return; }
-      window.location.href = `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/admin/${data.businessId}`;
+      window.location.href = `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/admin`;
     } finally {
       setSwitching(false);
     }
