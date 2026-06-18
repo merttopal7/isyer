@@ -24,7 +24,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       description: business.meta_description || business.description || undefined,
       url: bizUrl(slug, "/"),
       type: "website",
-      images: business.logo_url ? [{ url: business.logo_url }] : undefined,
+      images: business.logo_url
+        ? [{ url: `${process.env.NEXT_PUBLIC_APP_URL ?? ""}${business.logo_url}` }]
+        : undefined,
     },
   };
 }
@@ -36,7 +38,7 @@ export default async function IsletmeLayout({ children, params }: Props) {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <BusinessNavbar slug={slug} businessName={business.name} hasMap={!!business.map_embed} />
+      <BusinessNavbar slug={slug} businessName={business.name} hasMap={!!business.map_embed} logoUrl={business.logo_url ?? null} />
 
       <BusinessHeader
         name={business.name}

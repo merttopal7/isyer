@@ -17,9 +17,10 @@ interface Props {
   slug: string;
   businessName: string;
   hasMap: boolean;
+  logoUrl?: string | null;
 }
 
-export function BusinessNavbar({ slug, businessName, hasMap }: Props) {
+export function BusinessNavbar({ slug, businessName, hasMap, logoUrl }: Props) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -60,7 +61,16 @@ export function BusinessNavbar({ slug, businessName, hasMap }: Props) {
             href={bizPath(slug, "/duyurular")}
             className="flex min-w-0 items-center gap-1.5 font-medium hover:text-primary truncate"
           >
-            <Building2 className="h-4 w-4 shrink-0 text-muted-foreground" />
+            {logoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={logoUrl}
+                alt={businessName}
+                className="h-7 w-7 rounded-full object-cover shrink-0"
+              />
+            ) : (
+              <Building2 className="h-4 w-4 shrink-0 text-muted-foreground" />
+            )}
             <span className="truncate">{businessName}</span>
           </Link>
         </div>

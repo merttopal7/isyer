@@ -1,6 +1,8 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import db from "@/lib/db";
 import { getCustomerSession } from "@/lib/customer-auth";
+import { getBusinessBySlug } from "@/lib/get-business";
 import type { Appointment, Business, Service, StaffOrResource } from "@/types";
 import { ClaimButton } from "./claim-button";
 import { bizPath } from "@/lib/url";
@@ -27,6 +29,50 @@ function formatDate(d: string) {
   return new Date(y, m - 1, day).toLocaleDateString("tr-TR", {
     weekday: "long", day: "numeric", month: "long", year: "numeric",
   });
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string; booking_code: string }>;
+}): Promise<Metadata> {
+  const { slug, booking_code } = await params;
+
+  const appointment = await db<Appointment>("appointments")
+    .where({ booking_code: booking_code.toUpperCase() })
+    .first();
+
+  if (!appointment) return {};
+
+  const business = await getBusinessBySlug(slug);
+  if (!business || business.id !== appointment.business_id) return {};
+
+  const service = await db<Service>("services")
+    .where({ id: appointment.service_id })
+    .first();
+
+  const serviceName = service?.name ?? "Randevu";
+  const dateStr = formatDate(appointment.appointment_date);
+  const statusLabel = STATUS_META[appointment.status]?.label ?? "";
+
+  const title = `${serviceName} — ${business.name}`;
+  const description = `${dateStr}, Saat ${appointment.start_time} | ${statusLabel}`;
+
+  const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "";
+  const logoAbsUrl = business.logo_url ? `${APP_URL}${business.logo_url}` : undefined;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "article",
+      images: logoAbsUrl
+        ? [{ url: logoAbsUrl, width: 400, height: 400, alt: business.name }]
+        : undefined,
+    },
+  };
 }
 
 export default async function AppointmentDetailPage({
