@@ -6,6 +6,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import type { BookingState } from "./booking-flow";
 import type { Business } from "@/types";
+import { bizPath } from "@/lib/url";
 
 interface Props {
   booking: BookingState;
@@ -67,12 +68,12 @@ export function StepConfirmation({ booking, business }: Props) {
 
       <div className="flex flex-wrap justify-center gap-3">
         <Button asChild>
-          <Link href={`/isletme/${business.slug}/randevularim`}>
+          <Link href={bizPath(business.slug, "/randevularim")}>
             <CalendarSearch className="mr-2 h-4 w-4" /> Randevumu Takip Et
           </Link>
         </Button>
         <Button variant="outline" asChild>
-          <Link href={`/isletme/${business.slug}`}>İşletmeye Dön</Link>
+          <Link href={bizPath(business.slug)}>İşletmeye Dön</Link>
         </Button>
       </div>
     </div>
