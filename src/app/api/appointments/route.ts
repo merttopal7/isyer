@@ -119,7 +119,6 @@ export async function POST(req: NextRequest) {
       start_time: slot.start,
       end_time: slot.end,
       status: "pending",
-      reject_reason: null,
       booking_code,
     })
     .returning("*");
