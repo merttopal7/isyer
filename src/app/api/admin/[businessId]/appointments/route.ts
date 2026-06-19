@@ -85,7 +85,6 @@ export async function POST(
       start_time: slot.start,
       end_time: slot.end,
       status: "approved",
-      reject_reason: null,
       booking_code,
     })
     .returning("*");

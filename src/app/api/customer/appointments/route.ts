@@ -19,7 +19,6 @@ export async function GET() {
       "appointments.start_time",
       "appointments.end_time",
       "appointments.status",
-      "appointments.reject_reason",
       "appointments.booking_code",
       "appointments.created_at",
       "businesses.name as business_name",
