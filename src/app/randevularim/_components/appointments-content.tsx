@@ -20,7 +20,6 @@ type Row = {
   start_time: string;
   end_time: string;
   status: AppointmentStatus;
-  reject_reason: string | null;
   booking_code: string;
   created_at: string;
   business_name: string;
@@ -61,7 +60,6 @@ const STATUS_META: Record<AppointmentStatus, {
 }> = {
   pending:          { label: "Bekliyor",      icon: Clock,        badgeClass: "bg-amber-100 text-amber-700 border-amber-300 dark:bg-amber-900/30 dark:text-amber-300" },
   approved:         { label: "Onaylandı",     icon: CheckCircle2, badgeClass: "bg-green-100 text-green-700 border-green-300 dark:bg-green-900/30 dark:text-green-300" },
-  rejected:         { label: "Reddedildi",    icon: XCircle,      badgeClass: "bg-red-100 text-red-700 border-red-300 dark:bg-red-900/30 dark:text-red-300" },
   cancelled:        { label: "İptal Edildi",  icon: Ban,          badgeClass: "bg-muted text-muted-foreground border-border" },
   cancel_requested: { label: "İptal Talebi", icon: AlertCircle,  badgeClass: "bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-900/30 dark:text-orange-300" },
 };
@@ -278,11 +276,6 @@ function AppointmentCard({ row, cancelling, retracting, onCancel, onRetract }: {
             <span className="font-medium">{row.start_time}–{row.end_time}</span>
           </div>
 
-          {row.status === "rejected" && row.reject_reason && (
-            <p className="rounded-md bg-destructive/10 px-3 py-1.5 text-xs text-destructive">
-              {row.reject_reason}
-            </p>
-          )}
           {row.status === "cancel_requested" && (
             <p className="rounded-md bg-orange-50 px-3 py-1.5 text-xs text-orange-700 dark:bg-orange-900/20 dark:text-orange-300">
               İptal talebiniz işletme tarafından değerlendiriliyor.

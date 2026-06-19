@@ -14,7 +14,6 @@ import type { AppointmentStatus } from "@/types";
 const STATUS_MAP: Record<AppointmentStatus, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
   pending:          { label: "Onay Bekliyor", variant: "secondary" },
   approved:         { label: "Onaylandı",     variant: "default" },
-  rejected:         { label: "Reddedildi",    variant: "destructive" },
   cancelled:        { label: "İptal Edildi",  variant: "outline" },
   cancel_requested: { label: "İptal Talebi", variant: "outline" },
 };
@@ -28,7 +27,6 @@ interface AppointmentResult {
   start_time: string;
   end_time: string;
   status: AppointmentStatus;
-  reject_reason: string | null;
   booking_code: string;
   created_at: string;
 }
@@ -160,11 +158,6 @@ export default function RandevuSorgula() {
                         <span className="text-muted-foreground">Randevu Kodu</span>
                         <span className="font-mono font-medium">{a.booking_code}</span>
                       </div>
-                      {a.status === "rejected" && a.reject_reason && (
-                        <div className="mt-3 rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                          <strong>Red Sebebi:</strong> {a.reject_reason}
-                        </div>
-                      )}
                     </CardContent>
                   </Card>
                 );

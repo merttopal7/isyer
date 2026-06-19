@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
@@ -35,7 +34,6 @@ export type EnrichedAppointment = {
   start_time: string;
   end_time: string;
   status: AppointmentStatus;
-  reject_reason: string | null;
   booking_code: string;
   checked_in: boolean | null;
   created_at: string;
@@ -48,7 +46,6 @@ const STATUS_META: Record<AppointmentStatus, {
 }> = {
   pending:          { label: "Bekliyor",      icon: Clock,        variant: "secondary"   },
   approved:         { label: "Onaylandı",     icon: CheckCircle2, variant: "default"     },
-  rejected:         { label: "Reddedildi",    icon: XCircle,      variant: "destructive" },
   cancelled:        { label: "İptal Edildi",  icon: Ban,          variant: "outline"     },
   cancel_requested: { label: "İptal Talebi", icon: AlertCircle,  variant: "outline"     },
 };
@@ -56,12 +53,11 @@ const STATUS_META: Record<AppointmentStatus, {
 const STATUS_BLOCK: Record<AppointmentStatus, string> = {
   pending:          "border-l-amber-400  bg-amber-50   text-amber-900  dark:bg-amber-900/30  dark:text-amber-200  dark:border-l-amber-500",
   approved:         "border-l-green-500  bg-green-50   text-green-900  dark:bg-green-900/30  dark:text-green-200  dark:border-l-green-400",
-  rejected:         "border-l-red-400    bg-red-50     text-red-900    dark:bg-red-900/20    dark:text-red-300    dark:border-l-red-500",
   cancelled:        "border-l-border     bg-muted/50   text-muted-foreground",
   cancel_requested: "border-l-orange-400 bg-orange-50  text-orange-900 dark:bg-orange-900/30 dark:text-orange-200 dark:border-l-orange-500",
 };
 
-const ALL_STATUSES: AppointmentStatus[] = ["pending", "approved", "rejected", "cancelled", "cancel_requested"];
+const ALL_STATUSES: AppointmentStatus[] = ["pending", "approved", "cancelled", "cancel_requested"];
 const MONTH_NAMES = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
 const DAY_NAMES = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
 
@@ -164,7 +160,6 @@ function waLink(appt: EnrichedAppointment, businessSlug: string): string {
   const texts: Record<AppointmentStatus, string> = {
     pending:          `${greeting}${appt.service_name} randevunuz (${date} ${appt.start_time}) alındı ve onay bekleniyor. Randevu kodunuz: ${appt.booking_code}${apptUrl}`,
     approved:         `${greeting}${appt.service_name} randevunuz ${date} ${appt.start_time} için onaylanmıştır. Randevu kodunuz: ${appt.booking_code}${apptUrl}`,
-    rejected:         `${greeting}${appt.service_name} randevunuz maalesef uygun değildir.${appt.reject_reason ? ` Sebep: ${appt.reject_reason}` : ""}`,
     cancelled:        `${greeting}${appt.service_name} randevunuz (${date} ${appt.start_time}) iptal edilmiştir.`,
     cancel_requested: `${greeting}iptal talebiniz alınmıştır. En kısa sürede sizinle iletişime geçeceğiz.`,
   };
@@ -194,7 +189,7 @@ function WaButton({ appt, size = "sm", businessSlug }: { appt: EnrichedAppointme
   );
 }
 
-type ActionType = "approve" | "reject" | "cancel" | "approve_cancel" | "deny_cancel";
+type ActionType = "approve" | "cancel" | "approve_cancel" | "deny_cancel";
 
 function ApptCard({
   appt,
@@ -240,10 +235,7 @@ function ApptCard({
           <Button size="sm" className="h-7 text-xs flex-1" onClick={() => act("approve")}>
             <CheckCircle2 className="mr-1 h-3 w-3" /> Onayla
           </Button>
-          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => act("reject")}>
-            <XCircle className="mr-1 h-3 w-3" /> Reddet
-          </Button>
-          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => act("cancel")}>
+          <Button size="sm" variant="outline" className="h-7 text-xs flex-1" onClick={() => act("cancel")}>
             <Ban className="mr-1 h-3 w-3" /> İptal
           </Button>
         </div>
@@ -440,7 +432,6 @@ export function RandevularClient({
   // Action dialog
   const [actionTarget, setActionTarget] = useState<EnrichedAppointment | null>(null);
   const [actionType, setActionType] = useState<ActionType | null>(null);
-  const [rejectReason, setRejectReason] = useState("");
   const [actioning, setActioning] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   // ── Create appointment dialog ──
@@ -590,7 +581,6 @@ export function RandevularClient({
     setDetailAppt(null);
     setActionTarget(a);
     setActionType(type);
-    setRejectReason("");
   }
 
   async function confirmAction() {
@@ -598,11 +588,10 @@ export function RandevularClient({
     setActioning(true);
     try {
       const statusMap: Record<string, string> = {
-        approve: "approved", reject: "rejected", cancel: "cancelled",
+        approve: "approved", cancel: "cancelled",
         approve_cancel: "cancelled", deny_cancel: "approved",
       };
       const body: Record<string, unknown> = { status: statusMap[actionType] };
-      if (actionType === "reject") body.reject_reason = rejectReason || null;
       const res = await fetch(`/api/appointments/${actionTarget.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -612,7 +601,6 @@ export function RandevularClient({
       if (!res.ok) { toast.error(data.error ?? "İşlem başarısız."); return; }
       toast.success(
         actionType === "approve"         ? "Randevu onaylandı." :
-        actionType === "reject"          ? "Randevu reddedildi." :
         actionType === "approve_cancel"  ? "İptal talebi onaylandı, randevu iptal edildi." :
         actionType === "deny_cancel"     ? "İptal talebi reddedildi, randevu onaylı kaldı." :
                                            "Randevu iptal edildi."
@@ -802,16 +790,10 @@ export function RandevularClient({
                     <p className="font-mono text-xs text-muted-foreground">{a.booking_code}</p>
                     <WaButton appt={a} size="xs" businessSlug={businessSlug} />
                   </div>
-                  {a.status === "rejected" && a.reject_reason && (
-                    <p className="mt-1 rounded bg-destructive/10 px-2 py-1 text-xs text-destructive">{a.reject_reason}</p>
-                  )}
                   {a.status === "pending" && isFuture(a.appointment_date, a.start_time, todayKey) && (
                     <div className="mt-3 flex gap-2">
                       <Button size="sm" className="flex-1" onClick={() => openAction(a, "approve")}>
                         <CheckCircle2 className="mr-1 h-3.5 w-3.5" /> Onayla
-                      </Button>
-                      <Button size="sm" variant="outline" className="flex-1" onClick={() => openAction(a, "reject")}>
-                        <XCircle className="mr-1 h-3.5 w-3.5" /> Reddet
                       </Button>
                       <Button size="sm" variant="outline" className="flex-1" onClick={() => openAction(a, "cancel")}>
                         <Ban className="mr-1 h-3.5 w-3.5" /> İptal
@@ -903,20 +885,12 @@ export function RandevularClient({
                         <Badge variant={s.variant} className="gap-1">
                           <Icon className="h-3 w-3" />{s.label}
                         </Badge>
-                        {a.status === "rejected" && a.reject_reason && (
-                          <p className="mt-1 max-w-[140px] truncate text-xs text-muted-foreground" title={a.reject_reason}>
-                            {a.reject_reason}
-                          </p>
-                        )}
                       </TableCell>
                       <TableCell className="text-right">
                         {a.status === "pending" && isFuture(a.appointment_date, a.start_time, todayKey) && (
                           <div className="flex justify-end gap-1">
                             <Button size="sm" onClick={() => openAction(a, "approve")}>
                               <CheckCircle2 className="mr-1 h-3.5 w-3.5" /> Onayla
-                            </Button>
-                            <Button size="sm" variant="outline" onClick={() => openAction(a, "reject")}>
-                              <XCircle className="mr-1 h-3.5 w-3.5" /> Reddet
                             </Button>
                             <Button size="sm" variant="outline" onClick={() => openAction(a, "cancel")}>
                               <Ban className="mr-1 h-3.5 w-3.5" /> İptal
@@ -1378,8 +1352,7 @@ export function RandevularClient({
                             <span key={a.id} className={cn(
                               "h-1.5 w-1.5 rounded-full",
                               a.status === "pending" ? "bg-amber-400" :
-                                a.status === "approved" ? "bg-green-500" :
-                                  a.status === "rejected" ? "bg-red-400" : "bg-muted-foreground"
+                                a.status === "approved" ? "bg-green-500" : "bg-muted-foreground"
                             )} />
                           ))}
                           {dayApps.length > 4 && <span className="text-[8px] text-muted-foreground">+{dayApps.length - 4}</span>}
@@ -1721,22 +1694,14 @@ export function RandevularClient({
                       {detailAppt.booking_code}
                       <WaButton appt={detailAppt} size="xs" businessSlug={businessSlug} />
                     </span>
-                    {detailAppt.status === "rejected" && detailAppt.reject_reason && (
-                      <span className="block rounded bg-destructive/10 px-2 py-1 text-xs text-destructive">{detailAppt.reject_reason}</span>
-                    )}
                   </DialogDescription>
                 </DialogHeader>
                 {(detailAppt.status === "pending" || detailAppt.status === "approved") && isFuture(detailAppt.appointment_date, detailAppt.start_time, todayKey) && (
                   <DialogFooter className="gap-2">
                     {detailAppt.status === "pending" && (
-                      <>
-                        <Button size="sm" variant="outline" onClick={() => openAction(detailAppt, "reject")}>
-                          <XCircle className="mr-1 h-3.5 w-3.5" /> Reddet
-                        </Button>
-                        <Button size="sm" onClick={() => openAction(detailAppt, "approve")}>
-                          <CheckCircle2 className="mr-1 h-3.5 w-3.5" /> Onayla
-                        </Button>
-                      </>
+                      <Button size="sm" onClick={() => openAction(detailAppt, "approve")}>
+                        <CheckCircle2 className="mr-1 h-3.5 w-3.5" /> Onayla
+                      </Button>
                     )}
                     <Button size="sm" variant="outline" onClick={() => openAction(detailAppt, "cancel")}>
                       <Ban className="mr-1 h-3.5 w-3.5" /> İptal Et
@@ -1802,7 +1767,6 @@ export function RandevularClient({
           <DialogHeader>
             <DialogTitle>
               {actionType === "approve"        ? "Randevuyu Onayla" :
-               actionType === "reject"         ? "Randevuyu Reddet" :
                actionType === "approve_cancel" ? "İptal Talebini Onayla" :
                actionType === "deny_cancel"    ? "İptal Talebini Reddet" :
                                                  "Randevuyu İptal Et"}
@@ -1816,17 +1780,6 @@ export function RandevularClient({
             )}
           </DialogHeader>
 
-          {actionType === "reject" && (
-            <div className="space-y-1.5 py-2">
-              <Label>Red Sebebi (opsiyonel)</Label>
-              <Textarea
-                placeholder="Müşteriye gösterilecek red sebebi..."
-                value={rejectReason}
-                onChange={(e) => setRejectReason(e.target.value)}
-                rows={3}
-              />
-            </div>
-          )}
           {actionType === "approve" && (
             <p className="py-2 text-sm text-muted-foreground">
               Bu randevuyu onayladığınızda aynı saat dilimi başka randevular için dolu hale gelecektir.
@@ -1859,7 +1812,6 @@ export function RandevularClient({
             >
               {actioning && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {actionType === "approve"        ? "Onayla" :
-               actionType === "reject"         ? "Reddet" :
                actionType === "approve_cancel" ? "İptali Onayla" :
                actionType === "deny_cancel"    ? "Talebi Reddet" :
                                                  "İptal Et"}

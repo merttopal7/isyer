@@ -8,7 +8,7 @@ import { AppointmentsContent, type Row, type FilterKey } from "./_components/app
 
 const PER_PAGE = 8;
 const ACTIVE_STATUSES = ["pending", "approved", "cancel_requested"];
-const PAST_STATUSES   = ["rejected", "cancelled"];
+const PAST_STATUSES   = ["cancelled"];
 
 function statusList(filter: FilterKey) {
   if (filter === "active") return ACTIVE_STATUSES;
@@ -67,7 +67,6 @@ export default async function RandevularimPage({
         "appointments.start_time",
         "appointments.end_time",
         "appointments.status",
-        "appointments.reject_reason",
         "appointments.booking_code",
         "appointments.created_at",
         "businesses.name as business_name",

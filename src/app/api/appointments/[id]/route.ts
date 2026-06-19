@@ -17,7 +17,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   }
 
   const body = await req.json();
-  const { status, reject_reason, checked_in } = body;
+  const { status, checked_in } = body;
 
   // checked_in güncelleme (status bağımsız)
   if ("checked_in" in body) {
@@ -31,7 +31,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     return NextResponse.json(updated);
   }
 
-  if (!["approved", "rejected", "cancelled", "cancel_requested"].includes(status)) {
+  if (!["approved", "cancelled", "cancel_requested"].includes(status)) {
     return NextResponse.json({ error: "Geçersiz durum." }, { status: 400 });
   }
 
@@ -90,10 +90,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   await db<Appointment>("appointments")
     .where({ id: Number(id) })
-    .update({
-      status,
-      reject_reason: status === "rejected" ? (reject_reason ?? null) : null,
-    });
+    .update({ status });
 
   const updated = await db<Appointment>("appointments").where({ id: Number(id) }).first();
   return NextResponse.json(updated);

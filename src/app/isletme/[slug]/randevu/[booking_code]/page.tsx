@@ -8,7 +8,7 @@ import { ClaimButton } from "./claim-button";
 import { CopyLinkButton } from "./copy-link-button";
 import { bizPath } from "@/lib/url";
 import {
-  CheckCircle2, Clock, XCircle, Ban, AlertCircle,
+  CheckCircle2, Clock, Ban, AlertCircle,
   Calendar, Scissors, User, BookmarkCheck,
 } from "lucide-react";
 import type { AppointmentStatus } from "@/types";
@@ -20,7 +20,6 @@ const STATUS_META: Record<AppointmentStatus, {
 }> = {
   pending:          { label: "Onay Bekliyor", className: "bg-amber-100 text-amber-700 border-amber-300",    icon: Clock        },
   approved:         { label: "Onaylandı",     className: "bg-green-100 text-green-700 border-green-300",    icon: CheckCircle2 },
-  rejected:         { label: "Reddedildi",    className: "bg-red-100 text-red-700 border-red-300",          icon: XCircle      },
   cancelled:        { label: "İptal Edildi",  className: "bg-muted text-muted-foreground border-border",    icon: Ban          },
   cancel_requested: { label: "İptal Talebi", className: "bg-orange-100 text-orange-700 border-orange-300", icon: AlertCircle  },
 };
@@ -162,11 +161,6 @@ export default async function AppointmentDetailPage({
             </div>
           </div>
 
-          {appointment.status === "rejected" && appointment.reject_reason && (
-            <div className="rounded-lg bg-destructive/10 px-3 py-2 text-destructive">
-              <span className="font-medium">Red sebebi:</span> {appointment.reject_reason}
-            </div>
-          )}
         </div>
       </div>
 

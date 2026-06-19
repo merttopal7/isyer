@@ -1,6 +1,6 @@
 export type UserRole = "platform_admin" | "business_admin";
 export type BusinessStatus = "active" | "pending" | "inactive";
-export type AppointmentStatus = "pending" | "approved" | "rejected" | "cancelled" | "cancel_requested";
+export type AppointmentStatus = "pending" | "approved" | "cancelled" | "cancel_requested";
 
 export interface User {
   id: number;

@@ -5,8 +5,8 @@ import { RandevularClient, type EnrichedAppointment } from "./randevular-client"
 import type { AppointmentStatus, Service, StaffOrResource, Business } from "@/types";
 
 const PER_PAGE = 20;
-const VALID_STATUSES: AppointmentStatus[] = ["pending", "approved", "rejected", "cancelled", "cancel_requested"];
-const DEFAULT_STATUSES: AppointmentStatus[] = ["pending", "approved", "rejected"];
+const VALID_STATUSES: AppointmentStatus[] = ["pending", "approved", "cancelled", "cancel_requested"];
+const DEFAULT_STATUSES: AppointmentStatus[] = ["pending", "approved"];
 
 function toDateKey(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -37,7 +37,6 @@ const SELECT_COLS = [
   "appointments.start_time",
   "appointments.end_time",
   "appointments.status",
-  "appointments.reject_reason",
   "appointments.booking_code",
   "appointments.checked_in",
   "appointments.created_at",

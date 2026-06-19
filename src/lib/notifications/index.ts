@@ -7,8 +7,7 @@ export interface NotificationPayload {
   appointmentDate: string;
   appointmentTime: string;
   bookingCode: string;
-  status: "approved" | "rejected";
-  rejectReason?: string;
+  status: "approved" | "cancelled";
 }
 
 export async function sendAppointmentNotification(
