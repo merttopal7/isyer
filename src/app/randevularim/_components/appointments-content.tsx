@@ -46,11 +46,29 @@ function copyBookingLink(slug: string, bookingCode: string) {
   toast.success("Randevu linki kopyalandı!");
 }
 
-function whatsappUrl(phone: string, slug: string, bookingCode: string): string {
+function formatDateTR(d: string): string {
+  const [y, m, day] = d.split("-").map(Number);
+  return new Date(y, m - 1, day).toLocaleDateString("tr-TR", {
+    weekday: "long", day: "numeric", month: "long", year: "numeric",
+  });
+}
+
+function whatsappUrl(phone: string, row: Row): string {
   const digits = phone.replace(/\D/g, "");
   const number = digits.startsWith("0") ? `90${digits.slice(1)}` : digits;
-  const text = encodeURIComponent(bookingUrl(slug, bookingCode));
-  return `https://wa.me/${number}?text=${text}`;
+  const link = bookingUrl(row.business_slug, row.booking_code);
+  const lines = [
+    `${row.business_name} için randevu bilgilerim.`,
+    "",
+    `Hizmet: ${row.service_name}`,
+    `Tarih: ${formatDateTR(row.appointment_date)}`,
+    `Saat: ${row.start_time}`,
+    ...(row.staff_name ? [`Personel: ${row.staff_name}`] : []),
+    `Randevu Kodu: ${row.booking_code}`,
+    "",
+    link,
+  ];
+  return `https://wa.me/${number}?text=${encodeURIComponent(lines.join("\n"))}`;
 }
 
 const STATUS_META: Record<AppointmentStatus, {
@@ -327,7 +345,7 @@ function AppointmentCard({ row, cancelling, retracting, onCancel, onRetract }: {
         <div className="flex items-center gap-1">
           {row.business_phone && row.status === "pending" && (
             <a
-              href={whatsappUrl(row.business_phone, row.business_slug, row.booking_code)}
+              href={whatsappUrl(row.business_phone, row)}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1 rounded px-1.5 py-0.5 hover:bg-muted transition-colors text-green-600"
