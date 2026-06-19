@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import db from "@/lib/db";
-import { generateBookingCode, validatePhone } from "@/lib/slots";
+import { generateBookingCode, validatePhone, generateSlots, getTurkeyNow } from "@/lib/slots";
 import { getCustomerSession } from "@/lib/customer-auth";
 import type { Appointment, Business, Service, StaffOrResource, WorkingHour, ClosedDate } from "@/types";
-import { generateSlots } from "@/lib/slots";
 
 export async function POST(req: NextRequest) {
   const [body, customerSession] = await Promise.all([req.json(), getCustomerSession()]);
@@ -55,9 +54,8 @@ export async function POST(req: NextRequest) {
       : Promise.resolve([] as StaffOrResource[]),
   ]);
 
-  const now = new Date();
-  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-  const nowMinutes = appointment_date === todayStr ? now.getHours() * 60 + now.getMinutes() : undefined;
+  const { todayStr, nowMinutes: nowMin } = getTurkeyNow();
+  const nowMinutes = appointment_date === todayStr ? nowMin : undefined;
 
   const slots = generateSlots({
     date: appointment_date,

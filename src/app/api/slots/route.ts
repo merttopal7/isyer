@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import db from "@/lib/db";
-import { generateSlots } from "@/lib/slots";
+import { generateSlots, getTurkeyNow } from "@/lib/slots";
 import type { WorkingHour, ClosedDate, Appointment, Business, Service, StaffOrResource } from "@/types";
 
 export async function GET(req: NextRequest) {
@@ -36,9 +36,8 @@ export async function GET(req: NextRequest) {
       : Promise.resolve([] as StaffOrResource[]),
   ]);
 
-  const now = new Date();
-  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-  const nowMinutes = date === todayStr ? now.getHours() * 60 + now.getMinutes() : undefined;
+  const { todayStr, nowMinutes: nowMin } = getTurkeyNow();
+  const nowMinutes = date === todayStr ? nowMin : undefined;
 
   const slots = generateSlots({
     date,

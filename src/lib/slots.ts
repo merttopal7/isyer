@@ -125,3 +125,17 @@ export function extractPhoneDigits(value: string): string {
 export function validatePhone(phone: string): boolean {
   return /^05\d{9}$/.test(phone.replace(/\D/g, ""));
 }
+
+/** Sunucu timezone'undan bağımsız olarak Türkiye saatini (Europe/Istanbul) döner */
+export function getTurkeyNow(): { todayStr: string; nowMinutes: number } {
+  const now = new Date();
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Europe/Istanbul",
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", hour12: false,
+  }).formatToParts(now);
+  const get = (type: string) => Number(parts.find((p) => p.type === type)!.value);
+  const todayStr = `${get("year")}-${String(get("month")).padStart(2, "0")}-${String(get("day")).padStart(2, "0")}`;
+  const nowMinutes = get("hour") * 60 + get("minute");
+  return { todayStr, nowMinutes };
+}
