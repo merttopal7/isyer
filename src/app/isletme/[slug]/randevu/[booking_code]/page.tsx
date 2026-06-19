@@ -5,6 +5,7 @@ import { getCustomerSession } from "@/lib/customer-auth";
 import { getBusinessBySlug } from "@/lib/get-business";
 import type { Appointment, Business, Service, StaffOrResource } from "@/types";
 import { ClaimButton } from "./claim-button";
+import { CopyLinkButton } from "./copy-link-button";
 import { bizPath } from "@/lib/url";
 import {
   CheckCircle2, Clock, XCircle, Ban, AlertCircle,
@@ -168,6 +169,8 @@ export default async function AppointmentDetailPage({
           )}
         </div>
       </div>
+
+      <CopyLinkButton />
 
       {alreadyOwned && (
         <div className="rounded-xl border bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 p-4 flex items-center gap-3">

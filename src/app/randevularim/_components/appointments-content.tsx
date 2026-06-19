@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import {
   Calendar, CheckCircle2, Clock, XCircle, Ban,
   Building2, Scissors, User, ArrowRight, CalendarOff, Loader2, AlertCircle,
-  ChevronLeft, ChevronRight, MessageCircle, Copy,
+  ChevronLeft, ChevronRight, MessageCircle,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -344,14 +344,15 @@ function AppointmentCard({ row, cancelling, retracting, onCancel, onRetract }: {
               İşletmeye Bildir
             </a>
           )}
-          <button
-            onClick={() => copyBookingLink(row.business_slug, row.booking_code)}
+          <Link
+            href={PROD && DOMAIN
+              ? `/randevu/${row.booking_code}`
+              : `/isletme/${row.business_slug}/randevu/${row.booking_code}`}
             className="flex items-center gap-1 rounded px-1.5 py-0.5 hover:bg-muted transition-colors"
-            title="Randevu linkini kopyala"
           >
-            <Copy className="h-3 w-3" />
-            Linki Kopyala
-          </button>
+            <ArrowRight className="h-3 w-3" />
+            Detay Göster
+          </Link>
         </div>
       </div>
     </article>
