@@ -87,6 +87,9 @@ export default async function RandevularimPage({
           slug={fromBusiness.slug}
           businessName={fromBusiness.name}
           hasMap={!!fromBusiness.map_embed}
+          announcementsEnabled={!!(fromBusiness.announcements_enabled ?? true)}
+          menuEnabled={!!(fromBusiness.menu_enabled ?? true)}
+          bookingEnabled={!!(fromBusiness.booking_enabled ?? true)}
         />
       ) : (
         <Navbar />
