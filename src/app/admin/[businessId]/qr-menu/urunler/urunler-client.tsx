@@ -387,7 +387,7 @@ export function UrunlerClient({ businessId, initialCategories, initialItems }: P
               <Label>Kategori *</Label>
               <Select
                 value={form.category_id}
-                onValueChange={(v) => setForm((f) => ({ ...f, category_id: v }))}
+                onValueChange={(v) => setForm((f) => ({ ...f, category_id: v ?? "" }))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Kategori seçin" />
