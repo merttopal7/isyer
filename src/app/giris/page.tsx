@@ -7,7 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Navbar } from "@/components/shared/navbar";
-import { Loader2, LogIn, Calendar } from "lucide-react";
+import { Loader2, LogIn, Calendar, CheckCircle2 } from "lucide-react";
+import { validatePhone } from "@/lib/slots";
+import { PhoneInput } from "@/components/shared/phone-input";
+import { cn } from "@/lib/utils";
 
 function GoogleIcon() {
   return (

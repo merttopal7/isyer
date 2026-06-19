@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Loader2, Phone, CheckCircle2 } from "lucide-react";
@@ -10,7 +10,6 @@ import { PhoneInput } from "@/components/shared/phone-input";
 import { cn } from "@/lib/utils";
 
 function PhoneForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") ?? "/";
 
@@ -41,13 +40,7 @@ function PhoneForm() {
         setError(data.error ?? "Telefon kaydedilemedi.");
         return;
       }
-      // redirect tam URL ise (subdomain) full page load gerekir
-      if (redirect.startsWith("http")) {
-        window.location.href = redirect;
-      } else {
-        router.push(redirect);
-        router.refresh();
-      }
+      window.location.href = redirect;
     } finally {
       setLoading(false);
     }
