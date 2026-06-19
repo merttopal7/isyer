@@ -332,7 +332,7 @@ function AppointmentCard({ row, cancelling, retracting, onCancel, onRetract }: {
       <div className={cn("flex items-center justify-between gap-2 px-4 py-2 text-xs text-muted-foreground", (canAct && (row.status === "pending" || row.status === "approved")) ? "" : "border-t")}>
         <span>Randevu kodu: <span className="font-mono font-medium text-foreground">{row.booking_code}</span></span>
         <div className="flex items-center gap-1">
-          {row.business_phone && (
+          {row.business_phone && row.status === "pending" && (
             <a
               href={whatsappUrl(row.business_phone, row.business_slug, row.booking_code)}
               target="_blank"
