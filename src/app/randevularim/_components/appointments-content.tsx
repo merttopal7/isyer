@@ -32,6 +32,17 @@ type Row = {
 export type { Row };
 export type FilterKey = "active" | "past" | "all";
 
+const PROD   = process.env.NEXT_PUBLIC_PRODUCTION === "true";
+const DOMAIN = process.env.NEXT_PUBLIC_BASE_DOMAIN ?? "";
+
+function copyBookingLink(slug: string, bookingCode: string) {
+  const url = PROD && DOMAIN
+    ? `https://${slug}.${DOMAIN}/randevu/${bookingCode}`
+    : `${window.location.origin}/isletme/${slug}/randevu/${bookingCode}`;
+  navigator.clipboard.writeText(url);
+  toast.success("Randevu linki kopyalandı!");
+}
+
 const STATUS_META: Record<AppointmentStatus, {
   label: string;
   icon: React.ComponentType<{ className?: string }>;
@@ -307,8 +318,16 @@ function AppointmentCard({ row, cancelling, retracting, onCancel, onRetract }: {
         </div>
       )}
 
-      <div className={cn("px-4 py-2 text-xs text-muted-foreground", (canAct && (row.status === "pending" || row.status === "approved")) ? "" : "border-t")}>
-        Randevu kodu: <span className="font-mono font-medium text-foreground">{row.booking_code}</span>
+      <div className={cn("flex items-center justify-between gap-2 px-4 py-2 text-xs text-muted-foreground", (canAct && (row.status === "pending" || row.status === "approved")) ? "" : "border-t")}>
+        <span>Randevu kodu: <span className="font-mono font-medium text-foreground">{row.booking_code}</span></span>
+        <button
+          onClick={() => copyBookingLink(row.business_slug, row.booking_code)}
+          className="flex items-center gap-1 rounded px-1.5 py-0.5 hover:bg-muted transition-colors"
+          title="Randevu linkini kopyala"
+        >
+          <Copy className="h-3 w-3" />
+          Linki Kopyala
+        </button>
       </div>
     </article>
   );
