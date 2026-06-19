@@ -1519,21 +1519,31 @@ export function RandevularClient({
                   <p className="text-sm text-muted-foreground py-2">Bu tarihte müsait saat yok</p>
                 ) : (
                   <div className="grid grid-cols-4 gap-1.5 max-h-40 overflow-y-auto">
-                    {cSlots.map((slot) => (
-                      <button
-                        key={slot.start}
-                        disabled={!slot.available}
-                        onClick={() => setCTime(slot.start)}
-                        className={cn(
-                          "rounded-md border px-2 py-1.5 text-xs font-medium transition-colors",
-                          !slot.available && "opacity-40 cursor-not-allowed bg-muted text-muted-foreground",
-                          slot.available && cTime === slot.start && "bg-primary text-primary-foreground border-primary",
-                          slot.available && cTime !== slot.start && "hover:bg-muted"
-                        )}
-                      >
-                        {slot.start}
-                      </button>
-                    ))}
+                    {cSlots.map((slot) => {
+                      const isPast = (() => {
+                        const now = new Date();
+                        const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+                        if (cDate !== todayStr) return false;
+                        const [h, m] = slot.start.split(":").map(Number);
+                        return h * 60 + m < now.getHours() * 60 + now.getMinutes();
+                      })();
+                      const isDisabled = !slot.available || isPast;
+                      return (
+                        <button
+                          key={slot.start}
+                          disabled={isDisabled}
+                          onClick={() => setCTime(slot.start)}
+                          className={cn(
+                            "rounded-md border px-2 py-1.5 text-xs font-medium transition-colors",
+                            isDisabled && "opacity-40 cursor-not-allowed bg-muted text-muted-foreground",
+                            !isDisabled && cTime === slot.start && "bg-primary text-primary-foreground border-primary",
+                            !isDisabled && cTime !== slot.start && "hover:bg-muted"
+                          )}
+                        >
+                          {slot.start}
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
               </div>
