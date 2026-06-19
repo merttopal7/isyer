@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import db from "@/lib/db";
-import { generateBookingCode, validatePhone, generateSlots, getTurkeyNow } from "@/lib/slots";
+import { generateBookingCode, validatePhone, generateSlots } from "@/lib/slots";
 import { getCustomerSession } from "@/lib/customer-auth";
 import type { Appointment, Business, Service, StaffOrResource, WorkingHour, ClosedDate } from "@/types";
 
@@ -54,14 +54,22 @@ export async function POST(req: NextRequest) {
       : Promise.resolve([] as StaffOrResource[]),
   ]);
 
-  const { todayStr, nowMinutes: nowMin } = getTurkeyNow();
-  const nowMinutes = appointment_date === todayStr ? nowMin : undefined;
+  // Geçmiş saat kontrolü: aynı gün ise start_time şu andan önce olmamalı
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  if (appointment_date === todayStr) {
+    const [sh, sm] = start_time.split(":").map(Number);
+    const slotMinutes = sh * 60 + sm;
+    const nowMinutes = now.getHours() * 60 + now.getMinutes();
+    if (slotMinutes < nowMinutes) {
+      return NextResponse.json({ error: "Geçmiş bir saate randevu alınamaz." }, { status: 400 });
+    }
+  }
 
   const slots = generateSlots({
     date: appointment_date,
     durationMinutes: service.duration_minutes,
     slotIntervalMinutes: business.slot_interval_minutes ?? null,
-    nowMinutes,
     workingHours,
     closedDates,
     existingAppointments: appointments,

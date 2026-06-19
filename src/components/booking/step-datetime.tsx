@@ -23,6 +23,16 @@ function toDateStr(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
+function filterPastSlots(slots: TimeSlot[], date: Date): TimeSlot[] {
+  const now = new Date();
+  if (toDateStr(date) !== toDateStr(now)) return slots;
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  return slots.map((slot) => {
+    const [h, m] = slot.start.split(":").map(Number);
+    return h * 60 + m < nowMinutes ? { ...slot, available: false } : slot;
+  });
+}
+
 export function StepDateTime({ business, service, staffId, selectedDate, selectedTime, onSelect, onNext, onBack }: Props) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -47,7 +57,7 @@ export function StepDateTime({ business, service, staffId, selectedDate, selecte
         ...(staffId != null ? { staffId: String(staffId) } : {}),
       });
       const res = await fetch(`/api/slots?${params}`);
-      if (res.ok) setSlots(await res.json());
+      if (res.ok) setSlots(filterPastSlots(await res.json(), date));
     } finally {
       setLoading(false);
     }
