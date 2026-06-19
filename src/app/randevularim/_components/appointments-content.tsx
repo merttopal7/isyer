@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import {
   Calendar, CheckCircle2, Clock, XCircle, Ban,
   Building2, Scissors, User, ArrowRight, CalendarOff, Loader2, AlertCircle,
-  ChevronLeft, ChevronRight, MessageCircle,
+  ChevronLeft, ChevronRight, MessageCircle, Copy,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
