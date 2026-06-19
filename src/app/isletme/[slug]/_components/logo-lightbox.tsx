@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
 interface Props {
@@ -10,6 +11,9 @@ interface Props {
 
 export function LogoLightbox({ src, alt }: Props) {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -29,7 +33,7 @@ export function LogoLightbox({ src, alt }: Props) {
         <img src={src} alt={alt} className="h-full w-full object-cover" />
       </button>
 
-      {open && (
+      {mounted && open && createPortal(
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
           onClick={() => setOpen(false)}
@@ -48,7 +52,8 @@ export function LogoLightbox({ src, alt }: Props) {
             className="max-h-[90vh] max-w-[90vw] rounded-xl object-contain shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           />
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
