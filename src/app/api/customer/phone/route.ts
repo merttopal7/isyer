@@ -24,10 +24,11 @@ export async function PUT(req: NextRequest) {
 
   await db<Customer>("customers").where({ id: session.customerId }).update({ phone });
 
-  // Issue new token with the updated phone number
+  // Issue new token with the updated phone number (strip JWT reserved claims)
+  const { exp: _exp, iat: _iat, ...sessionData } = session as typeof session & { exp?: number; iat?: number };
   const newPayload = {
-    ...session,
-    phone: phone
+    ...sessionData,
+    phone: phone,
   };
   const newToken = signCustomerToken(newPayload);
   const res = NextResponse.json({ ok: true });
