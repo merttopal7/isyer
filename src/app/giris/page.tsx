@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,18 +24,21 @@ function GoogleIcon() {
 }
 
 function LoginForm() {
-  const router = useRouter();
   const params = useSearchParams();
   const redirect = params.get("redirect") ?? "/";
   const oauthError = params.get("error");
 
   const [phone, setPhone] = useState("");
+  const [phoneTouched, setPhoneTouched] = useState(false);
   const [password, setPassword] = useState("");
   const [error, setError] = useState(
     oauthError === "google_cancelled" ? "Google girişi iptal edildi." :
     oauthError ? "Google ile giriş sırasında bir hata oluştu." : ""
   );
   const [loading, setLoading] = useState(false);
+
+  const phoneValid = validatePhone(phone);
+  const showPhoneError = phoneTouched && phone.length > 0 && !phoneValid;
 
   function handleGoogleLogin() {
     window.location.href = `/api/auth/google?redirect=${encodeURIComponent(redirect)}`;
@@ -44,6 +47,7 @@ function LoginForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    if (!phoneValid) { setError("Geçerli bir Türkiye telefon numarası girin."); return; }
     setLoading(true);
     try {
       const res = await fetch("/api/customer/login", {
@@ -53,8 +57,7 @@ function LoginForm() {
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? "Giriş yapılamadı."); return; }
-      router.push(redirect);
-      router.refresh();
+      window.location.href = redirect;
     } finally {
       setLoading(false);
     }
@@ -82,8 +85,26 @@ function LoginForm() {
         )}
         <div className="space-y-1.5">
           <Label htmlFor="phone">Telefon Numarası</Label>
-          <Input id="phone" type="tel" placeholder="05XX XXX XX XX" value={phone}
-            onChange={(e) => setPhone(e.target.value)} autoComplete="tel" required />
+          <PhoneInput
+            id="phone"
+            value={phone}
+            onValueChange={(raw) => { setPhone(raw); setPhoneTouched(true); }}
+            onBlur={() => setPhoneTouched(true)}
+            autoComplete="tel"
+            required
+            autoFocus
+            className={cn(
+              showPhoneError && "border-destructive focus-visible:ring-destructive/20",
+              phoneValid && phone.length > 0 && "border-green-500 focus-visible:ring-green-500/20"
+            )}
+          />
+          {showPhoneError ? (
+            <p className="text-xs text-destructive">Format: 0 (5XX) XXX XXXX</p>
+          ) : phoneValid && phone.length > 0 ? (
+            <p className="flex items-center gap-1 text-xs text-green-600">
+              <CheckCircle2 className="h-3 w-3" /> Geçerli
+            </p>
+          ) : null}
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="password">Şifre</Label>
