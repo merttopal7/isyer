@@ -12,7 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { bizUrl } from "@/lib/url";
+import { bizUrl, bizPath } from "@/lib/url";
 import type { AppointmentStatus } from "@/types";
 
 type Row = {
@@ -343,9 +343,7 @@ function AppointmentCard({ row, cancelling, retracting, onCancel, onRetract }: {
             </a>
           )}
           <Link
-            href={PROD && DOMAIN
-              ? `/randevu/${row.booking_code}`
-              : `/isletme/${row.business_slug}/randevu/${row.booking_code}`}
+            href={bizPath(row.business_slug, `/randevu/${row.booking_code}`)}
             className="flex items-center gap-1 rounded px-1.5 py-0.5 hover:bg-muted transition-colors"
           >
             <ArrowRight className="h-3 w-3" />
