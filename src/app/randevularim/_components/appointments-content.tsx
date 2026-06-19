@@ -12,6 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { bizUrl } from "@/lib/url";
 import type { AppointmentStatus } from "@/types";
 
 type Row = {
@@ -32,20 +33,6 @@ type Row = {
 export type { Row };
 export type FilterKey = "active" | "past" | "all";
 
-const PROD   = process.env.NEXT_PUBLIC_PRODUCTION === "true";
-const DOMAIN = process.env.NEXT_PUBLIC_BASE_DOMAIN ?? "";
-
-function bookingUrl(slug: string, bookingCode: string): string {
-  return PROD && DOMAIN
-    ? `https://${slug}.${DOMAIN}/randevu/${bookingCode}`
-    : `${window.location.origin}/isletme/${slug}/randevu/${bookingCode}`;
-}
-
-function copyBookingLink(slug: string, bookingCode: string) {
-  navigator.clipboard.writeText(bookingUrl(slug, bookingCode));
-  toast.success("Randevu linki kopyalandı!");
-}
-
 function formatDateTR(d: string): string {
   const [y, m, day] = d.split("-").map(Number);
   return new Date(y, m - 1, day).toLocaleDateString("tr-TR", {
@@ -56,7 +43,7 @@ function formatDateTR(d: string): string {
 function whatsappUrl(phone: string, row: Row): string {
   const digits = phone.replace(/\D/g, "");
   const number = digits.startsWith("0") ? `90${digits.slice(1)}` : digits;
-  const link = bookingUrl(row.business_slug, row.booking_code);
+  const link = bizUrl(row.business_slug, `/randevu/${row.booking_code}`, window.location.origin);
   const lines = [
     `${row.business_name} için randevu bilgilerim.`,
     "",
