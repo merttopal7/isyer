@@ -20,9 +20,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     }
 
     const SEO_FIELDS = ["meta_title", "meta_description", "meta_keywords"];
+    const FEATURE_FIELDS = ["announcements_enabled", "menu_enabled", "booking_enabled", "navbar_enabled", "default_tab"];
     const allowed = isPlatform
-      ? ["name", "slug", "category", "description", "phone", "address", "status", "map_embed", "booking_advance_days", "slot_interval_minutes", ...SEO_FIELDS]
-      : ["name", "slug", "description", "phone", "address", "map_embed", "booking_advance_days", "slot_interval_minutes", ...SEO_FIELDS];
+      ? ["name", "slug", "category", "description", "phone", "address", "status", "map_embed", "booking_advance_days", "slot_interval_minutes", ...SEO_FIELDS, ...FEATURE_FIELDS]
+      : ["name", "slug", "description", "phone", "address", "map_embed", "booking_advance_days", "slot_interval_minutes", ...SEO_FIELDS, ...FEATURE_FIELDS];
 
     const updates: Partial<Business> = {};
     for (const key of allowed) {

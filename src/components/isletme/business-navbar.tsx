@@ -8,7 +8,7 @@ import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
   Calendar, CalendarPlus, Megaphone, MapPin,
-  User, LogOut, ChevronDown, Building2, LayoutDashboard, Loader2,
+  User, LogOut, ChevronDown, Building2, LayoutDashboard, Loader2, UtensilsCrossed,
 } from "lucide-react";
 import type { CustomerJwtPayload } from "@/types";
 import { bizPath } from "@/lib/url";
@@ -17,18 +17,22 @@ interface Props {
   slug: string;
   businessName: string;
   hasMap: boolean;
+  announcementsEnabled: boolean;
+  menuEnabled: boolean;
+  bookingEnabled: boolean;
   logoUrl?: string | null;
 }
 
-export function BusinessNavbar({ slug, businessName, hasMap, logoUrl }: Props) {
+export function BusinessNavbar({ slug, businessName, hasMap, announcementsEnabled, menuEnabled, bookingEnabled, logoUrl }: Props) {
   const pathname = usePathname();
 
   const [customer, setCustomer] = useState<CustomerJwtPayload | null | undefined>(undefined);
 
   const tabs = [
-    { href: bizPath(slug, "/duyurular"),   label: "Duyurular",    icon: Megaphone    },
-    { href: bizPath(slug, "/randevu"),     label: "Randevu Al",   icon: CalendarPlus },
-    ...(customer ? [{ href: bizPath(slug, "/randevularim"), label: "Randevularım", icon: Calendar }] : []),
+    ...(!!announcementsEnabled ? [{ href: bizPath(slug, "/duyurular"), label: "Duyurular", icon: Megaphone }] : []),
+    ...(!!menuEnabled    ? [{ href: bizPath(slug, "/kategoriler"), label: "Menü",       icon: UtensilsCrossed }] : []),
+    ...(!!bookingEnabled ? [{ href: bizPath(slug, "/randevu"),     label: "Randevu Al", icon: CalendarPlus    }] : []),
+    ...(!!bookingEnabled && customer ? [{ href: bizPath(slug, "/randevularim"), label: "Randevularım", icon: Calendar }] : []),
     ...(hasMap ? [{ href: bizPath(slug, "/konum"), label: "Konum", icon: MapPin }] : []),
   ];
 

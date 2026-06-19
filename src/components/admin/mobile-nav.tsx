@@ -7,12 +7,22 @@ import { Menu } from "lucide-react";
 import { AdminSidebar } from "./sidebar";
 import type { JwtPayload } from "@/types";
 
+interface Features {
+  bookingEnabled: boolean;
+  announcementsEnabled: boolean;
+  menuEnabled: boolean;
+}
+
 interface Props {
   session: JwtPayload;
   businessName?: string;
+  phone?: string | null;
+  pendingCount?: number;
+  announcementCount?: number;
+  features?: Features;
 }
 
-export function MobileNav({ session, businessName }: Props) {
+export function MobileNav({ session, businessName, phone, pendingCount, announcementCount, features }: Props) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -23,8 +33,17 @@ export function MobileNav({ session, businessName }: Props) {
           <span className="sr-only">Menüyü aç</span>
         </Button>
       } />
-      <SheetContent side="left" className="w-60 p-0">
-        <AdminSidebar session={session} businessName={businessName} onNavigate={() => setOpen(false)} />
+      <SheetContent side="left" className="w-72 p-0 sm:w-80">
+        <AdminSidebar
+          session={session}
+          businessName={businessName}
+          phone={phone}
+          pendingCount={pendingCount}
+          announcementCount={announcementCount}
+          features={features}
+          onNavigate={() => setOpen(false)}
+          forceExpanded
+        />
       </SheetContent>
     </Sheet>
   );

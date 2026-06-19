@@ -27,6 +27,11 @@ export interface Business {
   meta_keywords: string | null;
   logo_url: string | null;
   favicon_url: string | null;
+  announcements_enabled: boolean;
+  menu_enabled: boolean;
+  booking_enabled: boolean;
+  navbar_enabled: boolean;
+  default_tab: string;
   status: BusinessStatus;
   created_at: string;
 }
@@ -118,6 +123,29 @@ export interface Announcement {
   is_published: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface MenuCategory {
+  id: number;
+  business_id: number;
+  name: string;
+  slug: string;
+  description: string | null;
+  image_url: string | null;
+  is_published: boolean;
+  created_at: string;
+}
+
+export interface MenuItem {
+  id: number;
+  business_id: number;
+  category_id: number;
+  name: string;
+  description: string | null;
+  price: number | null;
+  image_url: string | null;
+  is_available: boolean;
+  created_at: string;
 }
 
 export interface TimeSlot {

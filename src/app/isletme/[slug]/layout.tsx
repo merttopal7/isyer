@@ -38,18 +38,20 @@ export default async function IsletmeLayout({ children, params }: Props) {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <BusinessNavbar slug={slug} businessName={business.name} hasMap={!!business.map_embed} logoUrl={business.logo_url ?? null} />
+      <BusinessNavbar slug={slug} businessName={business.name} hasMap={!!business.map_embed} announcementsEnabled={!!(business.announcements_enabled ?? true)} menuEnabled={!!(business.menu_enabled ?? true)} bookingEnabled={!!(business.booking_enabled ?? true)} logoUrl={business.logo_url ?? null} />
 
-      <BusinessHeader
-        slug={slug}
-        name={business.name}
-        category={business.category}
-        description={business.description ?? null}
-        phone={business.phone ?? null}
-        address={business.address ?? null}
-        logoUrl={business.logo_url ?? null}
-        hasMap={!!business.map_embed}
-      />
+      {!!(business.navbar_enabled ?? true) && (
+        <BusinessHeader
+          slug={slug}
+          name={business.name}
+          category={business.category}
+          description={business.description ?? null}
+          phone={business.phone ?? null}
+          address={business.address ?? null}
+          logoUrl={business.logo_url ?? null}
+          hasMap={!!business.map_embed}
+        />
+      )}
 
       {/* Page content */}
       <main className="flex-1 py-8">

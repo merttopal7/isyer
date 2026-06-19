@@ -358,17 +358,25 @@ export function RandevularClient({
     localStorage.setItem("admin_refresh_interval", String(val));
   }
 
+  const needsRefresh = useRef(false);
+
   useEffect(() => {
     if (refreshInterval === 0) { setCountdown(0); return; }
     setCountdown(refreshInterval);
     const timer = setInterval(() => {
       setCountdown((prev) => {
-        if (prev <= 1) { router.refresh(); return refreshInterval; }
+        if (prev <= 1) { needsRefresh.current = true; return refreshInterval; }
         return prev - 1;
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [refreshInterval, router]);
+  }, [refreshInterval]);
+
+  useEffect(() => {
+    if (!needsRefresh.current) return;
+    needsRefresh.current = false;
+    router.refresh();
+  }, [countdown, router]);
 
   const today = new Date();
   const todayKey = toDateKey(today);
