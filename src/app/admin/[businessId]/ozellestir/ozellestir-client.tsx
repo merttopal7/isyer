@@ -86,7 +86,8 @@ export function OzellestirClient({ business }: Props) {
     }
   }
 
-  async function changeDefaultTab(tab: string) {
+  async function changeDefaultTab(tab: string | null) {
+    if (!tab) return;
     setDefaultTab(tab);
     setSavingTab(true);
     try {
