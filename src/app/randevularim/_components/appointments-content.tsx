@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import {
   Calendar, CheckCircle2, Clock, XCircle, Ban,
   Building2, Scissors, User, ArrowRight, CalendarOff, Loader2, AlertCircle,
-  ChevronLeft, ChevronRight,
+  ChevronLeft, ChevronRight, MessageCircle,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,7 @@ type Row = {
   created_at: string;
   business_name: string;
   business_slug: string;
+  business_phone: string | null;
   service_name: string;
   staff_name: string | null;
 };
@@ -35,12 +36,22 @@ export type FilterKey = "active" | "past" | "all";
 const PROD   = process.env.NEXT_PUBLIC_PRODUCTION === "true";
 const DOMAIN = process.env.NEXT_PUBLIC_BASE_DOMAIN ?? "";
 
-function copyBookingLink(slug: string, bookingCode: string) {
-  const url = PROD && DOMAIN
+function bookingUrl(slug: string, bookingCode: string): string {
+  return PROD && DOMAIN
     ? `https://${slug}.${DOMAIN}/randevu/${bookingCode}`
     : `${window.location.origin}/isletme/${slug}/randevu/${bookingCode}`;
-  navigator.clipboard.writeText(url);
+}
+
+function copyBookingLink(slug: string, bookingCode: string) {
+  navigator.clipboard.writeText(bookingUrl(slug, bookingCode));
   toast.success("Randevu linki kopyalandı!");
+}
+
+function whatsappUrl(phone: string, slug: string, bookingCode: string): string {
+  const digits = phone.replace(/\D/g, "");
+  const number = digits.startsWith("0") ? `90${digits.slice(1)}` : digits;
+  const text = encodeURIComponent(bookingUrl(slug, bookingCode));
+  return `https://wa.me/${number}?text=${text}`;
 }
 
 const STATUS_META: Record<AppointmentStatus, {
@@ -320,14 +331,28 @@ function AppointmentCard({ row, cancelling, retracting, onCancel, onRetract }: {
 
       <div className={cn("flex items-center justify-between gap-2 px-4 py-2 text-xs text-muted-foreground", (canAct && (row.status === "pending" || row.status === "approved")) ? "" : "border-t")}>
         <span>Randevu kodu: <span className="font-mono font-medium text-foreground">{row.booking_code}</span></span>
-        <button
-          onClick={() => copyBookingLink(row.business_slug, row.booking_code)}
-          className="flex items-center gap-1 rounded px-1.5 py-0.5 hover:bg-muted transition-colors"
-          title="Randevu linkini kopyala"
-        >
-          <Copy className="h-3 w-3" />
-          Linki Kopyala
-        </button>
+        <div className="flex items-center gap-1">
+          {row.business_phone && (
+            <a
+              href={whatsappUrl(row.business_phone, row.business_slug, row.booking_code)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 rounded px-1.5 py-0.5 hover:bg-muted transition-colors text-green-600"
+              title="WhatsApp ile işletmeye bildir"
+            >
+              <MessageCircle className="h-3 w-3" />
+              İşletmeye Bildir
+            </a>
+          )}
+          <button
+            onClick={() => copyBookingLink(row.business_slug, row.booking_code)}
+            className="flex items-center gap-1 rounded px-1.5 py-0.5 hover:bg-muted transition-colors"
+            title="Randevu linkini kopyala"
+          >
+            <Copy className="h-3 w-3" />
+            Linki Kopyala
+          </button>
+        </div>
       </div>
     </article>
   );

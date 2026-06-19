@@ -72,6 +72,7 @@ export default async function RandevularimPage({
         "appointments.created_at",
         "businesses.name as business_name",
         "businesses.slug as business_slug",
+        "businesses.phone as business_phone",
         "services.name as service_name",
         "staff_or_resources.name as staff_name"
       ),
