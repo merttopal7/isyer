@@ -55,9 +55,9 @@ export function generateSlots({
   const startMin = timeToMinutes(wh.start_time);
   const endMin   = timeToMinutes(wh.end_time);
 
-  // Onaylı randevular — tarih+durum filtreli
+  // Onaylı ve bekleyen randevular — tarih+durum filtreli
   const approved = existingAppointments.filter(
-    (a) => a.appointment_date === date && a.status === "approved"
+    (a) => a.appointment_date === date && (a.status === "approved" || a.status === "pending")
   );
 
   // "Fark etmez" modunda: en az bir personel müsaitse slot açık

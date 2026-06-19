@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     db<ClosedDate>("closed_dates").where({ business_id: Number(business_id) }),
     db<Appointment>("appointments")
       .where({ business_id: Number(business_id), appointment_date })
-      .whereIn("status", ["approved"]),
+      .whereIn("status", ["approved", "pending"]),
     !staff_id
       ? db<StaffOrResource>("staff_or_resources").where({ business_id: Number(business_id), is_active: true })
       : Promise.resolve([] as StaffOrResource[]),

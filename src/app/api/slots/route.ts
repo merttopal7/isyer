@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
     db<ClosedDate>("closed_dates").where({ business_id: Number(businessId) }),
     db<Appointment>("appointments")
       .where({ business_id: Number(businessId), appointment_date: date })
-      .whereIn("status", ["approved"]),
+      .whereIn("status", ["approved", "pending"]),
     !staffId
       ? db<StaffOrResource>("staff_or_resources").where({ business_id: Number(businessId), is_active: true })
       : Promise.resolve([] as StaffOrResource[]),
